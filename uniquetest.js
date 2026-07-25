@@ -1,5 +1,5 @@
 const fs=require('fs'); const P='/home/claude/opus-realms/js/';
-const F=['data/realms.js','data/raids.js','data/items.js','data/talents.js','data/spells.js','data/crafting.js','data/effects.js','data/uniques.js','core/sound.js','core/state.js','core/passives.js','core/character.js','core/loot.js','core/combat.js','core/actions.js','core/merchant.js'];
+const F=['data/realms.js','data/raids.js','data/items.js','data/talents.js','data/spells.js','data/crafting.js','data/effects.js','data/uniques.js','data/sets.js','core/sound.js','core/state.js','core/passives.js','core/character.js','core/loot.js','core/combat.js','core/actions.js','core/merchant.js','core/descent.js'];
 const src='var localStorage={getItem:()=>null,setItem:()=>{},removeItem:()=>{}};var window={},document={addEventListener:()=>{}},performance={now:()=>0};'+F.map(f=>fs.readFileSync(P+f,'utf8')).join('\n');
 const G=new Function(src+`return {getS:()=>S,setS:v=>{S=v},SLOTS,Combat,TICK,REALMS,RAIDS,UNIQUES,PASSIVES,generateItem,makeUnique2,computeStats,freshSave,rollBossLoot,bossById,equipItem,rollMerchantStock,tickMerchant,runAutoSalvage,uniqueById,collectPassives,SMOOTH_WINDOW};`)();
 Object.defineProperty(G,'S',{get:()=>G.getS(),set:v=>G.setS(v),configurable:true});
@@ -11,7 +11,7 @@ G.Combat.win=function(){this.active=false;}; G.Combat.lose=function(){this.activ
 const fight=(realmIdx,cap)=>{G.Combat.start('realm',G.REALMS[realmIdx]); let t=0; while(G.Combat.active&&t<(cap||120)){G.Combat.step();t+=G.TICK;} return t;};
 
 console.log('=== DEFINITIONS ===');
-ok('20 uniques defined', G.UNIQUES.length===20, G.UNIQUES.length+' items');
+ok('at least 21 uniques defined', G.UNIQUES.length>=21, G.UNIQUES.length+' items');
 ok('every passive is implemented', G.UNIQUES.every(u=>G.PASSIVES[u.passive.id]),
    G.UNIQUES.filter(u=>!G.PASSIVES[u.passive.id]).map(u=>u.passive.id).join(',')||'all present');
 ok('every unique has a boss', G.UNIQUES.every(u=>G.bossById(u.boss)));
@@ -22,15 +22,28 @@ gear(46); wear('uq_levelling_weight');
 ok('passive collected', G.computeStats().passives.length===1, G.computeStats().passives[0].name);
 G.Combat.start('realm',G.REALMS[19]);
 const hp0=G.Combat.player.hp;
-// force one enemy swing and watch how health falls
-G.Combat.enemy.swingTimer=0.05;
-let steps=0, drops=[];
-let last=G.Combat.player.hp;
-while(steps<25 && G.Combat.active){ G.Combat.step(); steps++;
-  if(G.Combat.player.hp!==last){ drops.push(+(last-G.Combat.player.hp).toFixed(1)); last=G.Combat.player.hp; } }
-ok('one blow lands as many slices', drops.length>3, `${drops.length} separate deductions instead of 1`);
-ok('each slice is small', drops.every(d=>d<hp0*0.05), `largest slice ${Math.max(...drops).toFixed(1)}`);
-console.log(`     slices: ${drops.slice(0,6).map(d=>d.toFixed(0)).join(', ')}${drops.length>6?' …':''}`);
+
+/* Drive the passive directly rather than waiting for an enemy swing to land.
+   A swing can be dodged, which made this assertion fail about one run in thirty
+   — a flaky test is worse than no test, because it teaches you to ignore red. */
+const BLOW = 4000;
+const applied = G.Combat.passiveTransform('damageTaken', BLOW);
+ok('the blow is swallowed on impact', applied === 0, 'nothing lands in the instant it arrives');
+ok('it is queued instead', (G.Combat.passiveState.smoothQueue || []).length === 1);
+
+const drops=[]; let last=G.Combat.player.hp;
+for(let i=0;i<Math.round(G.SMOOTH_WINDOW/G.TICK)+3 && G.Combat.active;i++){
+  G.Combat.passiveNotify('tick');
+  const d = last - G.Combat.player.hp;
+  if (d > 0.001) drops.push(d);
+  last = G.Combat.player.hp;
+}
+ok('it lands as many small slices', drops.length >= 8, `${drops.length} deductions over ${G.SMOOTH_WINDOW}s`);
+ok('each slice is a fraction of the blow', Math.max(...drops) < BLOW * 0.2,
+   `largest ${Math.max(...drops).toFixed(0)} of a ${BLOW} blow`);
+const total = drops.reduce((a,b)=>a+b,0);
+ok('the full amount is still paid', Math.abs(total - BLOW) < 1, `${total.toFixed(0)} of ${BLOW} delivered`);
+ok('the queue empties', (G.Combat.passiveState.smoothQueue || []).length === 0);
 
 console.log('\n=== SURVIVABILITY: does smoothing actually help? ===');
 function survivalRate(useUnique, n){

@@ -27,6 +27,12 @@ const MANA_REGEN_SPIRIT_CAP = 0.014;
    use its handful of spells. Scales with level, not with the pool. */
 const MANA_REGEN_FLOOR = 4;
 
+/* How much Intellect and Spirit count toward spell COSTS versus toward the pool.
+   1 would mean costs track the pool exactly, so more Intellect changes nothing
+   about how many spells you can afford (the old behaviour). Below 1, extra
+   Intellect buys extra casts, with diminishing but never-reversing returns. */
+const MANA_COST_STAT_CREDIT = 0.6;
+
 /* Base stats a character has with no gear at all. */
 function baseStats(level) {
   return {
@@ -220,6 +226,21 @@ function computeStats(extraMods) {
   // pools
   st.maxHp = Math.round((140 + st.sta * 11 + S.level * 26) * (1 + (mods.hpPct || 0) / 100));
   st.maxMana = Math.round((110 + st.int * 3.4 + st.spi * 2.6 + S.level * 9) * (1 + (mods.manaPct || 0) / 100));
+
+  /* Reference pool used for spell COSTS, separate from the actual pool. It credits
+     Intellect and Spirit at a reduced rate (MANA_COST_STAT_CREDIT) instead of in
+     full, so investing in those stats genuinely buys more casts rather than raising
+     costs in lockstep with the pool. Before this, a spell cost a flat percentage of
+     the live pool — which grew with Intellect exactly as fast as the pool did, so
+     more Intellect changed a caster's damage per cast but never how many casts they
+     could afford. Level is credited in full, so mana stays a real constraint as you
+     level; max-mana buffs are excluded entirely, so a +max-mana effect is pure
+     casting headroom. Casts from a full pool then range from 1/manaPct with no
+     investment up toward 1/(credit*manaPct) as the stat climbs — always rewarding,
+     never unbounded. */
+  const manaFlat = 110 + S.level * 9;
+  const manaFromStats = st.int * 3.4 + st.spi * 2.6;
+  st.manaCostPool = Math.round(manaFlat + manaFromStats * MANA_COST_STAT_CREDIT);
 
   /* Regeneration is a share of the pool per second rather than a flat trickle,
      for the same reason spell costs are: a flat number is meaningless once the

@@ -311,7 +311,7 @@ function spellCard(id) {
     <div class="tip-meta">${tree.name} \u00B7 ${kind}${sp.school ? " \u00B7 " + (sp.school === "magic" ? "magical" : "physical") : ""}</div>
     <div class="tip-block">
       <div class="tip-stat"><span class="tip-val">${sp.cd}s</span><span class="tip-key">cooldown</span></div>
-      <div class="tip-stat"><span class="tip-val">${sp.manaPct}%</span><span class="tip-key">of your mana</span></div>
+      <div class="tip-stat"><span class="tip-val">${fmt(Math.round(computeStats().manaCostPool * (sp.manaPct || 0) / 100))}</span><span class="tip-key">mana</span></div>
       ${scale ? `<div class="tip-stat"><span class="tip-val">${Math.round((sp.coef || 0) * 100)}%</span><span class="tip-key">of ${scale}</span></div>` : ""}
       ${sp.duration ? `<div class="tip-stat"><span class="tip-val">${sp.duration}s</span><span class="tip-key">duration</span></div>` : ""}
     </div>

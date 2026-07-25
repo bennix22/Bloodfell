@@ -441,7 +441,7 @@ const GUIDES = {
     body: [
       "Spells cast themselves in combat. The list here is the priority order — the first spell that is ready, affordable and whose condition is met goes off — and you can reorder it.",
       "Each spell can be given a <b>condition</b>: only below a health threshold, only in the opening seconds, only against bosses, and so on. By default heals hold until you drop below 90% health.",
-      "Spell costs are a share of your mana pool, so they matter at every level. Every kill returns some mana, which is the main way a martial build stays topped up.",
+      "Spell costs scale with your level, not with your whole mana pool \u2014 so investing in Intellect (or Spirit) raises your pool faster than it raises costs, letting a caster afford more spells as well as hit harder. Every kill also returns some mana, which is how a martial build stays topped up.",
     ],
   },
   descent: {

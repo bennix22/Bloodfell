@@ -9,11 +9,28 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "0.9.2";
+const VERSION = "0.9.4";
 
 const CHANGELOG = [
   {
-    v: "0.9.2", date: "current",
+    v: "0.9.4", date: "current",
+    title: "The Blood Pact, and mana shown as numbers",
+    lines: [
+      "New Unique for martial builds: The Blood Pact (a trinket, dropped by Executioner Balgor). Its Blood Price passive makes your spells cost health instead of mana \u2014 so a Strength or Agility build can cast freely without any Intellect or mana at all, paying in life instead. Heavier spells bleed you harder, and a cast that would drop you too low simply will not fire, so it can never kill you.",
+      "Spell costs are now shown as an actual mana number everywhere \u2014 on the Skills page and in the spell tooltip \u2014 instead of a percentage.",
+    ],
+  },
+  {
+    v: "0.9.3", date: "",
+    title: "Intellect now improves casting",
+    lines: [
+      "Fixed spell costs scaling with your whole mana pool, which meant stacking Intellect raised the pool and the costs together and never changed how many spells you could afford.",
+      "Spell costs now scale with your level and only partly with Intellect, so investing in it raises your pool faster than your costs \u2014 a caster affords more spells as well as hitting harder, with diminishing returns so mana stays a real resource.",
+      "The Skills page now shows each spell's cost as an actual mana number instead of a percentage.",
+    ],
+  },
+  {
+    v: "0.9.2", date: "",
     title: "Combat health bar fix",
     lines: [
       "Fixed the player health and mana bars flashing to full for a moment each time an enemy died during a run. The bars now hold the carried value across the kill, matching what actually happens \u2014 nothing about the underlying health was ever wrong, only the display between fights.",

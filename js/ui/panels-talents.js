@@ -131,7 +131,7 @@ function renderSkills() {
              <span class="cw">${SPELL_CONDITIONS[c.type].unit}</span>` : ""}
         </div>
       </div>
-      <div class="sm">${sp.cd}s cooldown<br>${sp.manaPct}% mana</div>
+      <div class="sm">${sp.cd}s cooldown<br>${fmt(Math.round(computeStats().manaCostPool * (sp.manaPct || 0) / 100))} mana</div>
     </div>`;
   }).join("");
 

@@ -44,6 +44,12 @@ const RAMP_MAX_STACKS = 12;
 /* Mana returned per kill, as a fraction of the pool. Build-agnostic sustain. */
 const MANA_ON_KILL = 0.12;
 
+/* Blood Price: a spell's mana weight becomes this share of maximum health. 1.0
+   would mean a 5%-mana spell costs 5% of your health; below 1 softens the toll.
+   Tuned so a high-health martial can cast steadily but not endlessly — casting
+   drains you, and you stop when a cast would drop you too low. */
+const BLOOD_CAST_RATE = 0.7;
+
 /* Role archetypes. Everything a realm enemy is comes from here plus its level.
    `dmg` is a DAMAGE PER SECOND multiplier, not per swing. The engine multiplies
    it by the role's swing interval, so a slow Brute and a fast Stalker with the
@@ -615,7 +621,7 @@ const Combat = {
     const spells = unlockedSpells();
     for (const sp of spells) {
       if (p.cds[sp.id]) continue;
-      if (p.mana < this.spellCost(sp)) continue;
+      if (!this.canAfford(sp)) continue;
       if (!this.conditionMet(sp)) continue;
       // sensible default: do not waste heals or shields at full health
       if (!S.spellConditions[sp.id]
@@ -652,7 +658,16 @@ const Combat = {
 
   cast(sp) {
     const p = this.player, st = this.stats, e = this.enemy;
-    p.mana -= this.spellCost(sp);
+    /* Blood Price pays the cost in health rather than mana. The affordability
+       check in canAfford() guarantees the hit leaves the caster alive, so no
+       spell can be self-lethal — it simply will not fire when it would be. */
+    if (this.spellsCostHealth()) {
+      const hpCost = this.castHealthCost(sp);
+      p.hp = Math.max(1, p.hp - hpCost);
+      if (hpCost > 0) this.pushLog(`${sp.name} \u2014 paid ${fmt(Math.round(hpCost))} in blood.`, "cast");
+    } else {
+      p.mana -= this.spellCost(sp);
+    }
     p.cds[sp.id] = this.passiveTransform("cooldown", sp.cd * (1 - st.cdr / 100));
     p.gcd = Math.max(GCD_FLOOR, GCD_BASE / (1 + st.haste / 100));
     Sound.play("spell", 120);
@@ -702,8 +717,31 @@ const Combat = {
 
   /* Percentage of the pool, after any passive that alters it. */
   spellCost(sp) {
-    const base = this.stats.maxMana * (sp.manaPct || 0) / 100;
+    const base = this.stats.manaCostPool * (sp.manaPct || 0) / 100;
     return this.passiveTransform("manaCost", base);
+  },
+
+  /* Is a Blood Price passive making spells cost health? */
+  spellsCostHealth() {
+    const ps = this.stats.passives;
+    return !!(ps && ps.some(p => p.def.castsCostHealth));
+  },
+
+  /* The health a spell costs under Blood Price. A spell's mana weight (its
+     manaPct) becomes the same share of maximum HEALTH, so heavier spells bleed
+     you harder, and a deep health pool is what lets you cast more. Independent
+     of Intellect and the mana pool entirely. */
+  castHealthCost(sp) {
+    return this.stats.maxHp * (sp.manaPct || 0) / 100 * BLOOD_CAST_RATE;
+  },
+
+  /* Whether the next cast can be paid for at all. Under Blood Price the cost is
+     health and the hit must leave the caster alive; otherwise it is mana. */
+  canAfford(sp) {
+    if (this.spellsCostHealth()) {
+      return this.player.hp > this.castHealthCost(sp) + 1;
+    }
+    return this.player.mana >= this.spellCost(sp);
   },
 
   spellPower(sp) {

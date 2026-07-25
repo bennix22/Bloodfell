@@ -25,6 +25,18 @@
 
 const UNIQUES = [
   {
+    id: "uq_blood_pact",
+    name: "The Blood Pact",
+    flavour: "Signed in the only ink that was ever binding.",
+    slot: "trinket", ilvl: 44, boss: "r2b3", chance: 0.028,
+    stats: { sta: 260, str: 54, agi: 54 },
+    passive: {
+      id: "blood_price",
+      name: "Blood Price",
+      text: "Your spells cost no mana. Each one is paid for in health instead \u2014 so mana and Intellect stop mattering, and what you can cast is limited only by what you can afford to bleed. You will not spend yourself to death: a spell you could not survive simply will not fire.",
+    },
+  },
+  {
     id: "uq_levelling_weight",
     name: "The Levelling Weight",
     flavour: "A pendulum that refuses to let anything happen all at once.",

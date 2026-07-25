@@ -28,6 +28,18 @@ const DAMAGE_CAP_FRACTION = 0.12;
 const PASSIVES = {
 
   /* ------------------------------------------------------------------------
+     Blood Price — spells are paid for in health, not mana. A flag rather than
+     a hook: the combat loop reads `castsCostHealth` when a spell is cast and
+     when it decides what is affordable, drawing the cost from health instead of
+     mana. See BLOOD_CAST_RATE and spellsCostHealth() in combat.js. This is what
+     lets a Strength or Agility build cast freely without ever touching Intellect
+     or a mana pool — a berserker's answer to the resource, at the obvious cost.
+     ------------------------------------------------------------------------ */
+  blood_price: {
+    castsCostHealth: true,
+  },
+
+  /* ------------------------------------------------------------------------
      Even Keel — the incoming blow is queued and paid out in slices. Burst
      becomes a bleed, which a heal or a potion actually has time to answer.
      ------------------------------------------------------------------------ */
