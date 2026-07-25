@@ -109,8 +109,16 @@ UI.tickCombat = function (force) {
   if (!pEl || !eEl || !cEl) return;
 
   const st = Combat.stats || computeStats();
-  const php = Combat.active ? Combat.player.hp : st.maxHp;
-  const pmp = Combat.active ? Combat.player.mana : st.maxMana;
+  /* Between fights within a run the bars must show the CARRIED health and mana,
+     not full. Reading st.maxHp here made the bar jump to 100% the instant an
+     enemy died (win() sets active=false) and snap back down when the next fight
+     began. currentVitals() returns the persisted values, or full when there is
+     no run in progress — correct in both cases. */
+  const carried = Combat.active ? null : currentVitals();
+  const php = Combat.active ? Combat.player.hp : carried.hp;
+  const pmp = Combat.active ? Combat.player.mana : carried.mana;
+  const maxHp = Combat.active ? st.maxHp : carried.maxHp;
+  const maxMana = Combat.active ? st.maxMana : carried.maxMana;
 
   let buffs = "";
   if (Combat.active) {
@@ -128,9 +136,9 @@ UI.tickCombat = function (force) {
   pEl.innerHTML = `
     <div class="who"><b>${S.name === "Nameless" ? "You" : S.name}</b><span class="lv">level ${S.level}</span></div>
     <div class="roleline">${st.weapon.scalesWith === "int" ? "Caster" : st.weapon.scalesWith === "agi" ? "Duelist" : "Fighter"}</div>
-    <div class="bar hp"><i style="width:${clamp(php / st.maxHp * 100, 0, 100)}%"></i></div>
-    <div class="hpnum">${fmt(php)} / ${fmt(st.maxHp)}</div>
-    <div class="bar mana" style="margin-top:6px"><i style="width:${clamp(pmp / st.maxMana * 100, 0, 100)}%"></i></div>
+    <div class="bar hp"><i style="width:${clamp(php / maxHp * 100, 0, 100)}%"></i></div>
+    <div class="hpnum">${fmt(php)} / ${fmt(maxHp)}</div>
+    <div class="bar mana" style="margin-top:6px"><i style="width:${clamp(pmp / maxMana * 100, 0, 100)}%"></i></div>
     <div class="hpnum">${fmt(pmp)} mana</div>
     <div class="buffrow">${buffs}</div>`;
 

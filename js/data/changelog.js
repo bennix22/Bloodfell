@@ -9,11 +9,18 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "0.9.1";
+const VERSION = "0.9.2";
 
 const CHANGELOG = [
   {
-    v: "0.9.1", date: "current",
+    v: "0.9.2", date: "current",
+    title: "Combat health bar fix",
+    lines: [
+      "Fixed the player health and mana bars flashing to full for a moment each time an enemy died during a run. The bars now hold the carried value across the kill, matching what actually happens \u2014 nothing about the underlying health was ever wrong, only the display between fights.",
+    ],
+  },
+  {
+    v: "0.9.1", date: "",
     title: "The game has a name",
     lines: [
       "Opus Realms is now Bloodfell. Same world, less generic name \u2014 blood-forward and dark, and it fits the texture of the realms (Duskmire, Gravemoor, Voidscar).",
