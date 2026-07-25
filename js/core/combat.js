@@ -50,6 +50,12 @@ const MANA_ON_KILL = 0.12;
    drains you, and you stop when a cast would drop you too low. */
 const BLOOD_CAST_RATE = 0.7;
 
+/* Seconds between auto-drunk potions. This is a cooldown in COMBAT time that
+   persists across fights (see storeVitals/start), so in a fast auto-grind you
+   cannot drink one every fight — a potion is an occasional emergency heal, not a
+   per-fight top-up. */
+const POTION_COOLDOWN = 12;
+
 /* Role archetypes. Everything a realm enemy is comes from here plus its level.
    `dmg` is a DAMAGE PER SECOND multiplier, not per swing. The engine multiplies
    it by the role's swing interval, so a slow Brute and a fast Stalker with the
@@ -231,6 +237,9 @@ const Combat = {
     // health and mana carry across fights within a run; null means untouched
     this.player.hp = S.vitals.hp === null ? this.stats.maxHp : clamp(S.vitals.hp, 1, this.stats.maxHp);
     this.player.mana = S.vitals.mana === null ? this.stats.maxMana : clamp(S.vitals.mana, 0, this.stats.maxMana);
+    // the potion cooldown carries too, so a fast auto-grind cannot reset it to
+    // zero every fight and drink one each time
+    this.player.potionCd = Math.max(0, S.vitals.potionCd || 0);
 
     this.applyOpeningPotions();
     this.fightTime = 0;
@@ -796,7 +805,7 @@ const Combat = {
     }
     if (!po) return;
     if (!takePotion(po.id, 1)) return;
-    p.potionCd = 8;
+    p.potionCd = POTION_COOLDOWN;
     Sound.play("potion", 200);
     this.healPlayer(st.maxHp * po.pct / 100, po.name);
   },
@@ -1035,11 +1044,13 @@ function beginRun(realmId) {
   S.run.depth = 0;
   S.vitals.hp = null;
   S.vitals.mana = null;
+  S.vitals.potionCd = 0;
 }
 
 function storeVitals(C) {
   S.vitals.hp = Math.max(1, Math.round(C.player.hp));
   S.vitals.mana = Math.max(0, Math.round(C.player.mana));
+  S.vitals.potionCd = Math.max(0, C.player.potionCd || 0);
 }
 
 /* What the player currently has, for the interface to show outside a fight. */

@@ -89,7 +89,7 @@ function freshSave() {
        stops one strong effect being stamped onto all fifteen pieces at once.
        Shape: { helm: [ {kind, ...} ], chest: [ ... ], ... } */
     aspects: {},
-    vitals: { hp: null, mana: null },   // null means "full"
+    vitals: { hp: null, mana: null, potionCd: 0 },   // null means "full"
 
     kills: {},            // realmId -> total kills
     enemyKills: {},       // "realmId::Enemy Name" -> kills

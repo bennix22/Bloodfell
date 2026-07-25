@@ -45,6 +45,9 @@ function combatControls() {
       </label>
       <input type="number" min="5" max="95" step="5" value="${s.potionThreshold}"
              style="width:64px" onchange="setPotionThreshold(this.value)"> %
+      <select onchange="setHealPotion(this.value)">
+        <option value="">Strongest in bag</option>${healOpts}
+      </select>
       <label class="switch">
         <input type="checkbox" ${s.autoRetreat > 0 ? "checked" : ""} onchange="toggleAutoRetreat(this.checked)">
         Retreat below
@@ -52,9 +55,6 @@ function combatControls() {
       <input type="number" min="5" max="90" step="5" value="${s.autoRetreat || 25}"
              style="width:64px" onchange="setAutoRetreat(this.value)"
              ${s.autoRetreat > 0 ? "" : "disabled"}> %
-      <select onchange="setHealPotion(this.value)">
-        <option value="">Strongest in bag</option>${healOpts}
-      </select>
     </div>
     ${buffOpts ? `<div style="margin-top:8px">
       <div class="barlabel" style="margin-bottom:6px">

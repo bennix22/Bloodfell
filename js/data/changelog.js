@@ -9,11 +9,19 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "0.9.4";
+const VERSION = "0.9.5";
 
 const CHANGELOG = [
   {
-    v: "0.9.4", date: "current",
+    v: "0.9.5", date: "current",
+    title: "Potion cooldown fix",
+    lines: [
+      "Fixed auto-drunk health potions having no effective cooldown: the timer was reset at the start of every fight, so in a fast auto-grind you drank one each fight and your health leapt back toward full every time. The cooldown now carries across fights, so a potion is an occasional emergency heal instead of a per-fight top-up.",
+      "Moved the potion-choice dropdown next to the \"Drink health potions below\" control it belongs with, instead of off at the end of the row.",
+    ],
+  },
+  {
+    v: "0.9.4", date: "",
     title: "The Blood Pact, and mana shown as numbers",
     lines: [
       "New Unique for martial builds: The Blood Pact (a trinket, dropped by Executioner Balgor). Its Blood Price passive makes your spells cost health instead of mana \u2014 so a Strength or Agility build can cast freely without any Intellect or mana at all, paying in life instead. Heavier spells bleed you harder, and a cast that would drop you too low simply will not fire, so it can never kill you.",

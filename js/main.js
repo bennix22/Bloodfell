@@ -102,6 +102,8 @@ function frame(now) {
     UI.renderCharCard();
   } else if (pendingNext > 0) {
     pendingNext -= dt;
+    // the potion cooldown keeps recovering between fights, not only during them
+    if (S.vitals.potionCd > 0) S.vitals.potionCd = Math.max(0, S.vitals.potionCd - dt);
     if (pendingNext <= 0) {
       pendingNext = 0;
       startNextFight();
