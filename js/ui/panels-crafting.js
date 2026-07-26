@@ -2,58 +2,125 @@
    CRAFTING PANELS — blacksmith, alchemy, enchanting, materials.
    =========================================================================== */
 
-/* ------------------------------------------------------------ blacksmith */
+/* ------------------------------------------------------------ the forge */
+/* Approximate stat ranges for the preview. generateItem rolls magnitudes inside
+   these bands, so we show ranges, not fixed numbers. */
+function forgePreviewLines(tier, slot, primary, secondary, quality) {
+  const ilvl = CRAFT_TIERS[tier].ilvl;
+  const rarity = quality === "epic" ? "epic" : "rare";
+  const R = RARITIES[rarity];
+  const budget = itemBudget(ilvl) * R.budget;
+  const rng = (lo, hi, dec) => {
+    const f = dec ? (x => Math.round(x * 10) / 10) : (x => Math.round(x));
+    return `${fmt(f(lo))}\u2013${fmt(f(hi))}`;
+  };
+  const lines = [];
+  lines.push({ k: PRIMARY_LABEL[primary], v: rng(budget * 0.40, budget * 0.52) });
+  lines.push({ k: "Stamina", v: rng(budget * 0.20, budget * 0.30) });
+  if (ARMOR_SLOTS.includes(slot)) {
+    const armor = Math.round(armorBase(ilvl) * (ARMOR_SLOT_WEIGHT[slot] || 0.5) * (ARMOR_CLASS_MULT[primary] || 1) * (0.9 + R.budget * 0.25));
+    lines.push({ k: "Armor", v: fmt(armor) });
+  }
+  if (slot === "mainhand") {
+    const dps = weaponDps(ilvl) * R.budget;
+    lines.push({ k: "Weapon damage/sec", v: "~" + fmt(Math.round(dps)) });
+  }
+  // the chosen secondary is guaranteed; its size is roughly a third of the
+  // secondary budget
+  if (secondary && secondary !== "any") {
+    const sec = SECONDARY_POOL.find(s => s.key === secondary);
+    if (sec) {
+      const dec = !(sec.key === "critDmg" || sec.key === "thorns");
+      lines.push({ k: sec.label, v: rng((budget * 0.20 / 3) / sec.cost, (budget * 0.30 / 3) / sec.cost, dec) + "%", focus: true });
+    }
+  }
+  return lines;
+}
+
 function renderBlacksmith() {
   const tier = UI.tab.bsTier || 1;
-  const slotFilter = UI.tab.bsSlot || "";
+  const slot = UI.tab.bsSlot || "helm";
+  const primary = UI.tab.bsPrimary || "str";
+  const secondary = UI.tab.bsSecondary || "any";
+  const quality = UI.tab.bsQuality || "rare";
   const ct = CRAFT_TIERS[tier];
 
-  const tierTabs = [1, 2, 3, 4, 5].map(t => {
+  const chip = (on, label, onclick, extra) =>
+    `<button class="chip ${on ? "on" : ""} ${extra || ""}" onclick="${onclick}">${label}</button>`;
+
+  const tierTabs = [1, 2, 3, 4, 5, 6].map(t => {
     const locked = S.level < CRAFT_TIERS[t].req;
     return `<button class="tab ${t === tier ? "on" : ""}" onclick="UI.tab.bsTier=${t};UI.render()">
-      ${CRAFT_TIERS[t].label}${locked ? " \u2014 lvl " + CRAFT_TIERS[t].req : ""}
-    </button>`;
+      ${CRAFT_TIERS[t].label}${locked ? " \u00B7 lvl " + CRAFT_TIERS[t].req : ""}</button>`;
   }).join("");
 
-  const slotTabs = `<button class="tab ${!slotFilter ? "on" : ""}" onclick="UI.tab.bsSlot='';UI.render()">All slots</button>` +
-    SLOT_TYPES.map(s =>
-      `<button class="tab ${slotFilter === s ? "on" : ""}" onclick="UI.tab.bsSlot='${s}';UI.render()">${slotLabel(s)}</button>`
-    ).join("");
+  const slotChips = SLOT_TYPES.map(s =>
+    chip(slot === s, slotLabel(s), `UI.tab.bsSlot='${s}';UI.render()`)).join("");
 
-  let recipes = BS_RECIPES.filter(r => r.tier === tier);
-  if (slotFilter) recipes = recipes.filter(r => r.slot === slotFilter);
+  const primaryChips = BS_PRIMARIES.map(p =>
+    chip(primary === p, PRIMARY_LABEL[p], `UI.tab.bsPrimary='${p}';UI.render()`)).join("");
 
-  const rows = recipes.map(r => {
-    const chk = canCraft(r);
-    return `<div class="reciperow">
-      <div class="rn">
-        <span class="r-rare">${PRIMARY_LABEL[r.primary]} ${slotLabel(r.slot)}</span>
-        <div class="cost" style="margin-top:2px">item level ${r.ilvl} \u00B7 Rare \u00B7 ${costText(r.mats, r.gold)}</div>
-      </div>
-      <button class="btn sm ${chk.ok ? "primary" : ""}" ${chk.ok ? "" : "disabled"}
-              onclick="doCraft('${r.id}')">${chk.ok ? "Forge" : chk.msg}</button>
-    </div>`;
-  }).join("");
+  const focusChips = chip(secondary === "any", "Any", `UI.tab.bsSecondary='any';UI.render()`) +
+    SECONDARY_POOL.map(s =>
+      chip(secondary === s.key, s.label, `UI.tab.bsSecondary='${s.key}';UI.render()`)).join("");
+
+  const qualityChips =
+    chip(quality === "rare", "Rare", `UI.tab.bsQuality='rare';UI.render()`, "q-rare") +
+    chip(quality === "epic", "Epic", `UI.tab.bsQuality='epic';UI.render()`, "q-epic");
+
+  const rarity = quality === "epic" ? "epic" : "rare";
+  const cost = forgeCost(tier, slot, primary, quality);
+  const chk = canForge(tier, slot, primary, quality);
+  const lines = forgePreviewLines(tier, slot, primary, secondary, quality);
+  const statHtml = lines.map(l =>
+    `<div class="fp-stat ${l.focus ? "focus" : ""}"><span class="fp-v">${l.v}</span><span class="fp-k">${l.k}</span></div>`).join("");
+
+  const otherCount = (RARITIES[rarity].stats >= 3 ? 3 : RARITIES[rarity].stats) - (secondary !== "any" ? 1 : 0);
+  const secNote = secondary !== "any"
+    ? `Guaranteed above, plus ${otherCount} more secondary ${otherCount === 1 ? "stat" : "stats"} rolled at random.`
+    : `${Math.min(RARITIES[rarity].stats, 3)} secondary stats rolled at random.`;
+
+  const preview = `<div class="forge-preview">
+    <div class="fp-card b-${rarity} r-border-${rarity}">
+      <div class="fp-name r-${rarity}">${PRIMARY_LABEL[primary]} ${slotLabel(slot)}</div>
+      <div class="fp-sub">item level ${ct.ilvl} \u00B7 ${RARITIES[rarity].name}</div>
+      <div class="fp-stats">${statHtml}</div>
+      <div class="fp-note">${secNote} Magnitudes roll, so forging again can give a better one.</div>
+    </div>
+    <div class="fp-cost">${cost ? costText(cost.mats, cost.gold) : ""}</div>
+    <button class="btn lg ${chk.ok ? "primary" : ""}" ${chk.ok ? "" : "disabled"} onclick="doForge()">
+      ${chk.ok ? "Forge " + RARITIES[rarity].name : chk.msg}</button>
+  </div>`;
 
   return `<div class="phead">
-      <h2>Blacksmith</h2>
-      <p>Turns ore, hide and wood into gear. Every piece comes out Rare with rolled stats, so forging
-         the same recipe twice can give you a better one. Materials come from the realms and from salvaging.</p>
+      <h2>The Forge</h2>
+      <p>Compose a piece: pick its slot, its primary stat, one secondary you want guaranteed, and a quality.
+         Rare is the baseline; Epic costs more but rolls a bigger budget. Stat sizes still roll, so forging the
+         same piece again can give a better one \u2014 you choose the shape, luck decides the size.</p>
     </div>
 
     <div class="panel">
       <div class="tabs">${tierTabs}</div>
-      <div class="tabs">${slotTabs}</div>
       ${S.level < ct.req
-        ? `<div class="empty">${ct.label} recipes need level ${ct.req}. You are level ${S.level}.</div>`
-        : rows}
+        ? `<div class="empty">${ct.label} needs level ${ct.req}. You are level ${S.level}.</div>`
+        : `<div class="forge-grid">
+            <div class="forge-compose">
+              <div class="forge-field"><label>Slot</label><div class="chiprow">${slotChips}</div></div>
+              <div class="forge-field"><label>Primary stat</label><div class="chiprow">${primaryChips}</div></div>
+              <div class="forge-field"><label>Focus \u2014 guaranteed secondary</label><div class="chiprow">${focusChips}</div></div>
+              <div class="forge-field"><label>Quality</label><div class="chiprow">${qualityChips}</div></div>
+            </div>
+            ${preview}
+          </div>`}
     </div>
 
     ${materialsPanel("metal hide wood essence")}`;
 }
 
-function doCraft(id) {
-  const res = craftBlacksmith(id);
+function doForge() {
+  const res = craftForge(UI.tab.bsTier || 1, UI.tab.bsSlot || "helm",
+                         UI.tab.bsPrimary || "str", UI.tab.bsSecondary || "any",
+                         UI.tab.bsQuality || "rare");
   if (res.ok && res.item) {
     Sound.play(res.item.rarity === "epic" ? "rare" : "craft", 0);
     UI.toast(`Forged <span class="r-${res.item.rarity}">${res.item.name}</span>`, "good");

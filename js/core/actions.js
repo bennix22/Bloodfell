@@ -286,6 +286,61 @@ function craftBlacksmith(recipeId) {
   return { ok: true, msg: `Forged ${item.name}.`, item };
 }
 
+/* ---------------------------------------------------------------------------
+   THE FORGE — the reworked blacksmith. Instead of picking one of dozens of
+   fixed recipes, you compose a piece: its slot, its primary stat, one secondary
+   stat you want guaranteed, and a quality. Rare is the baseline; Epic costs
+   extra essence and gold but rolls a bigger budget and an extra affix. The stat
+   magnitudes still roll within a range, so forging the same piece again can give
+   a better one — you control the shape, luck controls the size.
+   --------------------------------------------------------------------------- */
+
+/* The material and gold cost of a forge, before checking whether you can pay. */
+function forgeCost(tier, slot, primary, quality) {
+  const base = BS_RECIPES.find(r => r.tier === tier && r.slot === slot && r.primary === primary);
+  if (!base) return null;
+  const mats = {};
+  for (const id in base.mats) mats[id] = base.mats[id];
+  let gold = base.gold;
+  if (quality === "epic") {
+    // Epic is a real investment: more of everything, and a heavy essence premium
+    for (const id in mats) mats[id] = Math.ceil(mats[id] * 1.6);
+    const essId = TIER_MATS[tier].essence;
+    mats[essId] = (mats[essId] || 0) + Math.ceil(tier * 1.5 + 1);
+    gold = Math.round(gold * 2.4);
+  }
+  return { mats, gold, req: base.req, ilvl: base.ilvl };
+}
+
+function canForge(tier, slot, primary, quality) {
+  const c = forgeCost(tier, slot, primary, quality);
+  if (!c) return { ok: false, msg: "No such recipe" };
+  if (S.level < c.req) return { ok: false, msg: `Requires level ${c.req}` };
+  if (S.gold < c.gold) return { ok: false, msg: "Not enough gold" };
+  if (!hasMaterials(c.mats)) return { ok: false, msg: "Missing materials" };
+  return { ok: true };
+}
+
+function craftForge(tier, slot, primary, secondary, quality) {
+  const c = forgeCost(tier, slot, primary, quality);
+  if (!c) return { ok: false, msg: "Unknown recipe." };
+  const chk = canForge(tier, slot, primary, quality);
+  if (!chk.ok) return { ok: false, msg: chk.msg + "." };
+
+  S.gold -= c.gold;
+  for (const id in c.mats) takeMaterial(id, c.mats[id]);
+
+  const rarity = quality === "epic" ? "epic" : "rare";
+  const item = generateItem({
+    ilvl: c.ilvl, rarity, slot, primary,
+    forceSecondary: secondary && secondary !== "any" ? secondary : null,
+  });
+  S.inventory.push(item);
+  S.tally.items++;
+  saveGame();
+  return { ok: true, msg: `Forged ${item.name}.`, item };
+}
+
 function brewPotion(potionId, qty) {
   const po = potionById(potionId);
   if (!po) return { ok: false, msg: "Unknown recipe." };

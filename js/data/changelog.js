@@ -22,6 +22,7 @@ const CHANGELOG = [
       "Two new talent rows (tiers 6 and 7) on every tree, reached by spending 25 and 30 points in a tree \\u2014 deep specialization now pays off with true capstones.",
       "Ten new spells, one pair per tree, unlocked at 30 and 35 points spent. Ultimates like Supernova, Apotheosis and Cataclysmic Slam.",
       "Dozens of new handcrafted drops across the new bosses, all on the item curve, plus realm gear that now climbs to item level 75.",
+      "The blacksmith is now the Forge: instead of a wall of fixed recipes, you compose a piece \\u2014 choose its slot, primary stat, a guaranteed secondary, and Rare or Epic quality \\u2014 with a live preview of what you'll get. Now forges through tier VI.",
       "Your save carries over: same character, same gear, same progress, with a lot more world past where you were standing.",
     ],
   },

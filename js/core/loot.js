@@ -88,7 +88,13 @@ function generateItem(opts) {
   const picks = [];
   const pool = SECONDARY_POOL.slice();
   const nSecondary = Math.min(R.stats, 3);
-  for (let i = 0; i < nSecondary && pool.length; i++) {
+  // a forge can guarantee one chosen secondary; it takes the first slot and the
+  // rest fill in randomly as usual
+  if (o.forceSecondary) {
+    const fi = pool.findIndex(p => p.key === o.forceSecondary);
+    if (fi >= 0) { picks.push(pool[fi]); pool.splice(fi, 1); }
+  }
+  for (let i = picks.length; i < nSecondary && pool.length; i++) {
     const weights = {};
     pool.forEach((p, idx) => { weights[idx] = (affinity[p.key] || 0.5); });
     const idx = parseInt(weightedPick(weights), 10);

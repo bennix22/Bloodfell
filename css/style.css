@@ -238,6 +238,59 @@ button { font-family: inherit; }
 .card .desc { font-size: calc(12.5px * var(--fs)); color: var(--ash); line-height: 1.45; flex: 1; }
 .card .foot { display: flex; align-items: center; gap: 8px; }
 
+/* ------------------------------------------------------------- the forge -- */
+.forge-grid {
+  display: grid; grid-template-columns: 1fr 300px; gap: 22px; align-items: start;
+}
+.forge-compose { min-width: 0; }
+.forge-field { margin-bottom: 16px; }
+.forge-field label {
+  display: block; font-family: var(--mono); font-size: calc(10px * var(--fs));
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); margin-bottom: 7px;
+}
+.chiprow { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  background: var(--pitch); border: 1px solid var(--edge); border-radius: var(--radius);
+  color: var(--ash); padding: 5px 11px; font-size: calc(12px * var(--fs));
+  font-family: var(--sans); cursor: pointer; transition: border-color 0.12s, color 0.12s, background 0.12s;
+}
+.chip:hover { border-color: var(--edge-hi); color: var(--bone); }
+.chip.on {
+  background: var(--raise); border-color: var(--brass); color: var(--brass-hi);
+  box-shadow: inset 0 0 0 1px rgba(189,140,69,0.2);
+}
+.chip.q-epic.on { border-color: var(--r-epic); color: var(--r-epic); box-shadow: inset 0 0 0 1px rgba(138,95,176,0.25); }
+.chip.q-rare.on { border-color: var(--r-rare); color: var(--r-rare); box-shadow: inset 0 0 0 1px rgba(74,127,181,0.25); }
+
+.forge-preview { position: sticky; top: 12px; }
+.fp-card {
+  background: linear-gradient(180deg, var(--slate), var(--pitch));
+  border: 1px solid var(--edge); border-left-width: 3px; border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.fp-name { font-family: var(--serif); font-size: calc(17px * var(--fs)); font-weight: 600; }
+.fp-sub {
+  font-family: var(--mono); font-size: calc(10px * var(--fs)); letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--dim); margin: 3px 0 12px;
+}
+.fp-stats { display: flex; flex-direction: column; gap: 5px; }
+.fp-stat { display: flex; align-items: baseline; gap: 8px; font-size: calc(13px * var(--fs)); }
+.fp-stat .fp-v { font-family: var(--mono); color: var(--brass-hi); min-width: 84px; }
+.fp-stat .fp-k { color: var(--ash); }
+.fp-stat.focus .fp-v { color: var(--verdant); }
+.fp-stat.focus .fp-k { color: var(--bone); }
+.fp-note {
+  margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--edge);
+  font-size: calc(11.5px * var(--fs)); color: var(--dim); line-height: 1.5;
+}
+.fp-cost { margin: 12px 0; font-family: var(--mono); font-size: calc(11.5px * var(--fs)); color: var(--ash); }
+.btn.lg { width: 100%; justify-content: center; padding: 11px; font-size: calc(14px * var(--fs)); }
+
+@media (max-width: 720px) {
+  .forge-grid { grid-template-columns: 1fr; }
+  .forge-preview { position: static; }
+}
+
 .tag {
   font-family: var(--mono); font-size: calc(9.5px * var(--fs)); letter-spacing: 0.08em;
   padding: 2px 7px; border-radius: 2px; text-transform: uppercase;

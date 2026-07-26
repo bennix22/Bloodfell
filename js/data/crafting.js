@@ -81,6 +81,7 @@ const CRAFT_TIERS = {
   3: { ilvl: 31, req: 24, label: "Tier III" },
   4: { ilvl: 40, req: 34, label: "Tier IV" },
   5: { ilvl: 46, req: 43, label: "Tier V" },
+  6: { ilvl: 64, req: 55, label: "Tier VI" },
 };
 
 /* ---------------------------------------------------------------------------
@@ -114,7 +115,7 @@ const PRIMARY_LABEL = { str: "Strength", agi: "Agility", int: "Intellect", spi: 
 
 function buildBlacksmithRecipes() {
   const out = [];
-  for (let tier = 1; tier <= 5; tier++) {
+  for (let tier = 1; tier <= 6; tier++) {
     const t = TIER_MATS[tier];
     const ct = CRAFT_TIERS[tier];
     const mult = 1 + (tier - 1) * 0.35;
@@ -152,7 +153,7 @@ const POTIONS = [
   { id: "po_h2", name: "Clotted Red Draught", tier: 2, kind: "heal", pct: 40, req: 13, gold: 90, mats: { m_herb2: 3, m_ess2: 1 } },
   { id: "po_h3", name: "Gravebloom Tonic", tier: 3, kind: "heal", pct: 50, req: 24, gold: 300, mats: { m_herb3: 3, m_ess3: 1 } },
   { id: "po_h4", name: "Palefrond Restorative", tier: 4, kind: "heal", pct: 62, req: 34, gold: 900, mats: { m_herb4: 3, m_ess4: 1 } },
-  { id: "po_h5", name: "Corpselily Elixir", tier: 6, kind: "heal", pct: 74, req: 58, gold: 2600, mats: { m_herb6: 3, m_ess6: 1 } },
+  { id: "po_h6", name: "Corpselily Elixir", tier: 6, kind: "heal", pct: 74, req: 58, gold: 2600, mats: { m_herb6: 3, m_ess6: 1 } },
   { id: "po_h5", name: "Voidblossom Elixir", tier: 5, kind: "heal", pct: 75, req: 43, gold: 2600, mats: { m_herb5: 3, m_ess5: 1 } },
 
   // --- mana
