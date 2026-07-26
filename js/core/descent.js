@@ -218,6 +218,10 @@ function makeDescentEnemy() {
   }
   e.descentFloor = floor;
   e.descentILvl = descentDropLevel(floor);
+  // a display-only level that climbs with depth. Combat is driven entirely by the
+  // floor power curve, so the level used in the damage math stays fixed — this is
+  // just so a floor-110 enemy doesn't read "level 50".
+  e.displayLevel = 50 + floor;
   return e;
 }
 

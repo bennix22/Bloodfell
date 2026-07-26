@@ -66,6 +66,13 @@ Combat.onUpdate = function (kind, result) {
     return;
   }
 
+  // keep the descent status panel (floor, boon/warden countdown, power) current
+  // after every floor — it isn't part of the arena that ticks each frame
+  if (UI.route === "descent" && S.descent.active) {
+    const el = document.getElementById("descent-status");
+    if (el) el.outerHTML = descentStatusPanel();
+  }
+
   if (S.settings.autoGrind && UI.grind) {
     pendingNext = nextFightDelay();
   } else {

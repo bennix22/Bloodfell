@@ -23,7 +23,11 @@
    =========================================================================== */
 
 const SMOOTH_WINDOW = 1.0;      // seconds that Even Keel spreads a blow across
-const DAMAGE_CAP_FRACTION = 0.12;
+// Chain of the Drowned reduces all incoming damage by a flat fraction. Unlike a
+// hard cap, this stays killable: a big enough blow always lands for enough to
+// matter (e.g. against 20k health, a 150k hit still deals ~105k). Very tanky,
+// never immortal.
+const DROWNED_DR = 0.30;
 
 const PASSIVES = {
 
@@ -48,6 +52,9 @@ const PASSIVES = {
 
     damageTaken(C, dmg) {
       const slices = Math.max(1, Math.round(SMOOTH_WINDOW / TICK));
+      // the queue is normally created at fightStart, but a Levelling Weight can be
+      // equipped mid-fight (after fightStart ran), so create it on demand
+      if (!C.passiveState.smoothQueue) C.passiveState.smoothQueue = [];
       C.passiveState.smoothQueue.push({ perTick: dmg / slices, left: slices });
       return 0;   // nothing lands right now; the queue pays it out
     },
@@ -145,10 +152,11 @@ const PASSIVES = {
     },
   },
 
-  /* Caps any single blow, which is what makes big bosses survivable. */
+  /* Reduces all incoming damage by a flat fraction. Tanky but always killable:
+     bigger hits always land for more, so no special-casing and no immortality. */
   damage_cap: {
     damageTaken(C, dmg) {
-      return Math.min(dmg, C.stats.maxHp * DAMAGE_CAP_FRACTION);
+      return dmg * (1 - DROWNED_DR);
     },
   },
 

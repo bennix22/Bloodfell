@@ -35,19 +35,19 @@ const SPELLS = [
   /* ------------------------------------------------------------------ WARRIOR */
   { id: "sp_w1", tree: "warrior", req: 5, name: "Sundering Blow", type: "damage", school: "phys",
     scale: "weapon", coef: 1.04, cd: 6, manaPct: 4,
-    desc: "A heavy overhead swing. 190% weapon damage." },
+    desc: "A heavy overhead swing. 104% weapon damage." },
 
   { id: "sp_w2", tree: "warrior", req: 10, name: "Gaping Wound", type: "dot", school: "phys",
     scale: "weapon", coef: 0.88, cd: 12, manaPct: 5, duration: 8, ticks: 4,
-    desc: "Opens a wound that will not close. 160% weapon damage over 8 seconds." },
+    desc: "Opens a wound that will not close. 88% weapon damage over 8 seconds." },
 
   { id: "sp_w3", tree: "warrior", req: 15, name: "Bulwark Crash", type: "damage", school: "phys",
     scale: "weapon", coef: 0.83, cd: 10, manaPct: 5.5, buff: { mods: { block: 15, dr: 8 }, duration: 8 },
-    desc: "Slam with everything you are carrying. 150% weapon damage, then +15% Block and 8% damage reduction for 8s." },
+    desc: "Slam with everything you are carrying. 83% weapon damage, then +15% Block and 8% damage reduction for 8s." },
 
   { id: "sp_w4", tree: "warrior", req: 20, name: "Whirling Ruin", type: "damage", school: "phys",
     scale: "weapon", coef: 1.76, cd: 18, manaPct: 8.5,
-    desc: "Everything within reach, several times. 320% weapon damage." },
+    desc: "Everything within reach, several times. 176% weapon damage." },
 
   { id: "sp_w5", tree: "warrior", req: 25, name: "Wrath Ascendant", type: "buff", school: "phys",
     cd: 60, manaPct: 11, buff: { mods: { allDmg: 35, haste: 20, lifesteal: 5 }, duration: 15 },
@@ -55,11 +55,11 @@ const SPELLS = [
 
   { id: "sp_w6", tree: "warrior", req: 30, name: "Ruinous Cleave", type: "damage", school: "phys",
     scale: "weapon", coef: 2.4, cd: 20, manaPct: 9,
-    desc: "A single, ruinous arc. 440% weapon damage." },
+    desc: "A single, ruinous arc. 240% weapon damage." },
 
   { id: "sp_w7", tree: "warrior", req: 35, name: "Cataclysmic Slam", type: "damage", school: "phys",
     scale: "weapon", coef: 3.6, cd: 30, manaPct: 12, execBonus: 1.5,
-    desc: "The ground splits. 650% weapon damage, half again as much to the wounded." },
+    desc: "The ground splits. 360% weapon damage, half again as much to the wounded." },
 
   /* ------------------------------------------------------------------ PALADIN */
   { id: "sp_p1", tree: "paladin", req: 5, name: "Verdict", type: "damage", school: "magic",
@@ -122,15 +122,15 @@ const SPELLS = [
   /* -------------------------------------------------------------------- ROGUE */
   { id: "sp_r1", tree: "rogue", req: 5, name: "Vile Cut", type: "damage", school: "phys",
     scale: "weapon", coef: 0.94, cd: 5, manaPct: 3.5,
-    desc: "Fast and unkind. 170% weapon damage." },
+    desc: "Fast and unkind. 94% weapon damage." },
 
   { id: "sp_r2", tree: "rogue", req: 10, name: "Hemorrhage", type: "dot", school: "phys",
     scale: "weapon", coef: 1.1, cd: 12, manaPct: 5.5, duration: 10, ticks: 5,
-    desc: "They will keep bleeding while you work. 200% weapon damage over 10 seconds." },
+    desc: "They will keep bleeding while you work. 110% weapon damage over 10 seconds." },
 
   { id: "sp_r3", tree: "rogue", req: 15, name: "Throatrend", type: "damage", school: "phys",
     scale: "weapon", coef: 1.43, cd: 11, manaPct: 6.5, execBonus: 1.6,
-    desc: "260% weapon damage, and 60% more against targets below 30% Health." },
+    desc: "143% weapon damage, and 60% more against targets below 30% Health." },
 
   { id: "sp_r4", tree: "rogue", req: 20, name: "Frenzy Draught", type: "buff",
     cd: 45, manaPct: 8, buff: { mods: { haste: 40, crit: 8 }, duration: 12 },
@@ -142,11 +142,11 @@ const SPELLS = [
 
   { id: "sp_r6", tree: "rogue", req: 30, name: "Death Mark", type: "damage", school: "phys",
     scale: "weapon", coef: 2.4, cd: 18, manaPct: 9, execBonus: 1.6,
-    desc: "A killing blow to a marked throat. 440% weapon damage, more to the wounded." },
+    desc: "A killing blow to a marked throat. 240% weapon damage, more to the wounded." },
 
   { id: "sp_r7", tree: "rogue", req: 35, name: "Thousand Cuts", type: "dot", school: "phys",
     scale: "weapon", coef: 3.9, cd: 28, manaPct: 12, duration: 10, ticks: 5,
-    desc: "Too many wounds to count. 710% weapon damage over 10 seconds." },
+    desc: "Too many wounds to count. 390% weapon damage over 10 seconds." },
 
   /* ------------------------------------------------------------------- PRIEST */
   { id: "sp_s1", tree: "priest", req: 5, name: "Censure", type: "damage", school: "magic",

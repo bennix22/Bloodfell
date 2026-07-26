@@ -27,7 +27,7 @@ const TALENT_START_LEVEL = 10;
    The exponent controls the shape rather than the length: raise it and the last
    ten levels become the bulk of the game, lower it and the climb is more even.
    --------------------------------------------------------------------------- */
-const XP_PACE = 1.33;
+const XP_PACE = 2.5;
 const XP_EXPONENT = 1.85;
 
 function xpToNext(lvl) {

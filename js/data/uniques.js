@@ -168,8 +168,8 @@ const UNIQUES = [
     stats: { str: 78, sta: 145, armor: 284, block: 12.1 },
     passive: {
       id: "damage_cap",
-      name: "Nothing Sudden",
-      text: "No single blow can take more than 12% of your maximum Health. Enormous hits become survivable; small ones are unchanged.",
+      name: "Undertow",
+      text: "You take 30% less damage from every source. The deep drags part of each blow away \u2014 but a heavy enough hit still reaches you.",
     },
   },
   {

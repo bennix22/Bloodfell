@@ -152,7 +152,7 @@ UI.tickCombat = function (force) {
       ? ` <span class="elite-tag">+${Math.round((e.escalation - 1) * 100)}% hp, +${Math.round((e.escalationDmg - 1) * 100)}% dmg from ${e.kills} kills</span>` : "";
     const elite = e.elite ? ` <span class="elite-tag">Elite +${Math.round(e.eliteBonus * 100)}%</span>` : "";
     eEl.innerHTML = `
-      <div class="who"><b>${e.name}</b><span class="lv">level ${e.level}</span></div>
+      <div class="who"><b>${e.name}</b><span class="lv">level ${e.displayLevel || e.level}</span></div>
       <div class="roleline">${e.roleLabel}${elite}${esc}${depthLabel}</div>
       <div class="bar hp"><i style="width:${clamp(e.hp / e.maxHp * 100, 0, 100)}%"></i></div>
       <div class="hpnum">${fmt(e.hp)} / ${fmt(e.maxHp)}</div>
@@ -493,7 +493,7 @@ function descentStatusPanel() {
   const nextBoon = DESCENT_BOON_EVERY - ((d.floor - 1) % DESCENT_BOON_EVERY);
   const nextWarden = DESCENT_WARDEN_EVERY - ((d.floor - 1) % DESCENT_WARDEN_EVERY);
   const power = Math.round((Math.pow(DESCENT_POWER_RATE, d.floor - 1) - 1) * 100);
-  return `<div class="panel">
+  return `<div class="panel" id="descent-status">
     <div class="ctrlbar">
       <span style="font-size:17px;font-family:var(--serif)">Floor <b style="color:var(--brass-hi)">${d.floor}</b></span>
       <span class="tag">enemies +${power}%</span>

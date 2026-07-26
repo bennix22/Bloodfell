@@ -9,11 +9,22 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.0.0";
+const VERSION = "1.0.1";
 
 const CHANGELOG = [
   {
-    v: "1.0.0", date: "current",
+    v: "1.0.1", date: "current",
+    title: "1.0.1 — bug fixes",
+    lines: [
+      "Fixed a crash that could happen when equipping a trinket (the Levelling Weight) in the middle of a fight.",
+      "Chain of the Drowned reworked. Together with the Levelling Weight it was making characters effectively immortal \u2014 capping every blow at 12% of your health, no matter how enormous. It now simply reduces all damage by 30%: still very tanky, and it still pairs with the Levelling Weight, but a big enough hit will kill you again.",
+      "The Descent now shows enemy levels climbing with depth, and the floor / next-boon / next-warden counter updates after every floor instead of freezing.",
+      "Weapon skill tooltips now state their true weapon-damage percentage \u2014 several read almost double their real value (Ruinous Cleave said 440%, actually 240%).",
+      "The Forge preview no longer shows \u201C0% to 0%\u201D for Critical Strike and other percentage stats; it shows the real rolled range.",
+    ],
+  },
+  {
+    v: "1.0.0", date: "",
     title: "1.0 — the world doubles in size",
     lines: [
       "The level cap is now 75. Every level from 10 onward still grants a talent point, so a level-75 character has far more to spend.",

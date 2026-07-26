@@ -11,8 +11,13 @@ function forgePreviewLines(tier, slot, primary, secondary, quality) {
   const R = RARITIES[rarity];
   const budget = itemBudget(ilvl) * R.budget;
   const rng = (lo, hi, dec) => {
-    const f = dec ? (x => Math.round(x * 10) / 10) : (x => Math.round(x));
-    return `${fmt(f(lo))}\u2013${fmt(f(hi))}`;
+    // percentage secondaries (crit, haste, lifesteal…) are small decimals; fmt()
+    // rounds to a whole number and would collapse them to "0", so format directly
+    if (dec) {
+      const d = x => (Math.round(x * 10) / 10).toFixed(1);
+      return `${d(lo)}\u2013${d(hi)}`;
+    }
+    return `${fmt(lo)}\u2013${fmt(hi)}`;
   };
   const lines = [];
   lines.push({ k: PRIMARY_LABEL[primary], v: rng(budget * 0.40, budget * 0.52) });
