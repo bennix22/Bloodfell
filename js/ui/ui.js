@@ -208,7 +208,7 @@ const UI = {
         <div class="clhead">
           <span class="clver">v${e.v}</span>
           <span class="cltitle">${e.title}</span>
-          ${e.date === "current" ? `<span class="clcurrent">you are here</span>` : ""}
+          ${e.date === "current" ? `<span class="clcurrent">LIVE</span>` : ""}
         </div>
         <ul class="cllines">
           ${e.lines.map(l => `<li>${l}</li>`).join("")}
