@@ -9,11 +9,19 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.1.0";
+const VERSION = "1.2.0";
 
 const CHANGELOG = [
   {
-    v: "1.1.0", date: "current",
+    v: "1.2.0", date: "current",
+    title: "1.2.0 — a face of its own",
+    lines: [
+      "Bloodfell has a proper logo now, up in the corner where the plain title used to be.",
+      "Panels are framed with brass corner brackets, and every page header carries a small blood-drop emblem and a divider beneath it. First step of a larger art pass \u2014 item and monster art still to come.",
+    ],
+  },
+  {
+    v: "1.1.0", date: "",
     title: "1.1.0 — quality of life",
     lines: [
       "Pause button, next to Stop: freezes the fight in place so you can read the combat log, without ending your run.",

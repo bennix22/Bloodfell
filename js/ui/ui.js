@@ -21,8 +21,7 @@ const UI = {
       <div class="app">
         <aside class="rail">
           <div class="brand">
-            <h1>Bloodfell</h1>
-            <div class="sub">the ground drinks deep</div>
+            ${typeof BRAND_LOGO !== "undefined" ? BRAND_LOGO : `<h1>Bloodfell</h1><div class="sub">the ground drinks deep</div>`}
           </div>
           <div class="charcard" id="charcard"></div>
           <nav class="nav" id="nav"></nav>

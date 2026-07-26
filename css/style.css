@@ -1150,3 +1150,24 @@ input[type="range"] { accent-color: var(--brass); }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ---- framing: panel corner brackets, header emblem + divider (art pass) ---- */
+.panel {
+  background-color: var(--pitch);
+  background-image: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2720%27%20height%3D%2720%27%3E%3Cpath%20d%3D%27M2%2013%20L2%202%20L13%202%27%20fill%3D%27none%27%20stroke%3D%27%23b8863f%27%20stroke-width%3D%271.4%27%2F%3E%3C%2Fsvg%3E"), url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2720%27%20height%3D%2720%27%3E%3Cpath%20d%3D%27M18%2013%20L18%202%20L7%202%27%20fill%3D%27none%27%20stroke%3D%27%23b8863f%27%20stroke-width%3D%271.4%27%2F%3E%3C%2Fsvg%3E"), url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2720%27%20height%3D%2720%27%3E%3Cpath%20d%3D%27M2%207%20L2%2018%20L13%2018%27%20fill%3D%27none%27%20stroke%3D%27%23b8863f%27%20stroke-width%3D%271.4%27%2F%3E%3C%2Fsvg%3E"), url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2720%27%20height%3D%2720%27%3E%3Cpath%20d%3D%27M18%207%20L18%2018%20L7%2018%27%20fill%3D%27none%27%20stroke%3D%27%23b8863f%27%20stroke-width%3D%271.4%27%2F%3E%3C%2Fsvg%3E");
+  background-position: left 6px top 6px, right 6px top 6px, left 6px bottom 6px, right 6px bottom 6px;
+  background-repeat: no-repeat;
+  background-size: 20px 20px;
+}
+.phead h2::before {
+  content: ""; display: inline-block; width: 13px; height: 17px; margin-right: 9px;
+  vertical-align: -2px; background: url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2713%27%20height%3D%2717%27%20viewBox%3D%270%200%2013%2017%27%3E%3Cpath%20d%3D%27M6.5%201%20C3%206%202%208.5%202%2011%20a4.5%204.5%200%201%200%209%200%20C11%208.5%2010%206%206.5%201%20z%27%20fill%3D%27%23ac3c3c%27%2F%3E%3C%2Fsvg%3E") no-repeat center / contain;
+}
+.phead::after {
+  content: ""; display: block; margin-top: 15px; height: 15px;
+  background:
+    url("data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20width%3D%2712%27%20height%3D%2715%27%20viewBox%3D%270%200%2013%2017%27%3E%3Cpath%20d%3D%27M6.5%201%20C3%206%202%208.5%202%2011%20a4.5%204.5%200%201%200%209%200%20C11%208.5%2010%206%206.5%201%20z%27%20fill%3D%27%23ac3c3c%27%2F%3E%3C%2Fsvg%3E") no-repeat center,
+    linear-gradient(90deg, transparent, rgba(189,140,69,0.45) 14%, rgba(189,140,69,0.45) 86%, transparent) no-repeat center / 100% 1.5px;
+}
+.brand-logo { display: block; width: 100%; height: auto; }
+.brand { padding: 14px 14px 12px; }
