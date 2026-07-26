@@ -253,9 +253,9 @@ function itemsForSlot(slot) {
   const out = [];
   for (const s of SLOTS) {
     const it = S.equipment[s.key];
-    if (it && it.slot === slot) out.push({ item: it, worn: true });
+    if (it && it.slot === slot && !it.uniqueId) out.push({ item: it, worn: true });
   }
-  for (const it of S.inventory) if (it.slot === slot) out.push({ item: it, worn: false });
+  for (const it of S.inventory) if (it.slot === slot && !it.uniqueId) out.push({ item: it, worn: false });
   return out;
 }
 

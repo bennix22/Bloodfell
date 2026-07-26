@@ -953,6 +953,14 @@ input[type="range"] { accent-color: var(--brass); }
   background: var(--slate); border: 1px solid var(--edge-hi);
   border-left: 3px solid var(--witch);
   border-radius: var(--radius); padding: 11px 13px; margin-bottom: 8px;
+  cursor: pointer; transition: border-color 0.12s, background 0.12s;
+}
+.aspectcard:hover { border-color: var(--witch); }
+.aspectcard.sel { background: rgba(125,108,184,0.14); border-color: var(--witch); box-shadow: inset 0 0 0 1px rgba(125,108,184,0.35); }
+.aspchosen, .hasaspect {
+  font-family: var(--mono); font-size: calc(8.5px * var(--fs)); letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--witch); border: 1px solid rgba(125,108,184,0.4);
+  border-radius: 2px; padding: 1px 5px; margin-left: 6px; vertical-align: middle;
 }
 .aspname {
   font-family: var(--serif); font-size: calc(13.5px * var(--fs));

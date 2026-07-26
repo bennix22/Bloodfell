@@ -9,11 +9,20 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.0.1";
+const VERSION = "1.0.2";
 
 const CHANGELOG = [
   {
-    v: "1.0.1", date: "current",
+    v: "1.0.2", date: "current",
+    title: "1.0.2 — more fixes",
+    lines: [
+      "Aspects: you can now choose which aspect to etch — click one to select it, then etch it onto any item. Uniques no longer appear in the etch list (they can't be reshaped), and an item that already carries an aspect is now clearly marked.",
+      "Two-handed weapons no longer show a false upgrade arrow on off-hand items you can't equip while wielding them.",
+      "Cleaned up a loophole from an older build: any talent points placed past their tier requirement are refunded on load for you to re-spend. Placing them was already blocked going forward.",
+    ],
+  },
+  {
+    v: "1.0.1", date: "",
     title: "1.0.1 — bug fixes",
     lines: [
       "Fixed a crash that could happen when equipping a trinket (the Levelling Weight) in the middle of a fight.",

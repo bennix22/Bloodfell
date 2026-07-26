@@ -360,6 +360,9 @@ function slotLabel(slotType) {
 
 /* Compares an inventory item against whatever is currently worn. */
 function upgradeDelta(item) {
+  // an offhand can't be worn while a two-handed weapon is equipped, so it's never
+  // an upgrade in that state — don't tempt the player with an arrow they can't use
+  if (item.slot === "offhand" && typeof isTwoHanded === "function" && isTwoHanded(S.equipment.mainhand)) return 0;
   const targets = slotsForItem(item);
   let best = Infinity;
   for (const t of targets) best = Math.min(best, itemScore(S.equipment[t]));

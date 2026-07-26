@@ -192,13 +192,17 @@ function renderEnchanting() {
   const slotButtons = SLOT_TYPES.map(t => {
     const count = (S.aspects[t] || []).length;
     const on = slotType === t;
-    return `<button class="btn sm ${on ? "primary" : ""}" onclick="UI.tab.aspectSlot='${t}';UI.render()">
+    return `<button class="btn sm ${on ? "primary" : ""}" onclick="UI.tab.aspectSlot='${t}';UI.tab.aspectPick=0;UI.render()">
       ${slotTypeLabel(t)}${count ? ` <span class="aspcount">${count}</span>` : ""}</button>`;
   }).join("");
 
+  // which aspect in the pool is selected to etch (clamped to the pool)
+  let pick = UI.tab.aspectPick || 0;
+  if (pick >= pool.length) pick = 0;
+
   const aspectCards = pool.length ? pool.map((a, i) => `
-    <div class="aspectcard">
-      <div class="aspname">${a.name}</div>
+    <div class="aspectcard ${i === pick ? "sel" : ""}" onclick="UI.tab.aspectPick=${i};UI.render()">
+      <div class="aspname">${a.name}${i === pick ? ` <span class="aspchosen">chosen</span>` : ""}</div>
       <div class="asptext">${aspectLabel(a)}</div>
       <div class="aspslot">fits any ${slotTypeLabel(slotType).toLowerCase()}</div>
     </div>`).join("") : `<div class="empty" style="padding:20px">
@@ -209,12 +213,12 @@ function renderEnchanting() {
     const has = item.aspect;
     return `<div class="itemrow b-${item.rarity}" data-tip="${worn ? "eq:" + slotKeyOf(item) : "inv:" + item.uid}">
       <div class="main">
-        <div class="nm r-${item.rarity}">${item.name}${worn ? ` <span class="worntag">worn</span>` : ""}</div>
-        <div class="sub">item level ${item.ilvl} · ${has ? "carries the " + item.aspect.name + " aspect"
+        <div class="nm r-${item.rarity}">${item.name}${worn ? ` <span class="worntag">worn</span>` : ""}${has ? ` <span class="hasaspect">${item.aspect.name}</span>` : ""}</div>
+        <div class="sub">item level ${item.ilvl} \u00B7 ${has ? "carries the " + item.aspect.name + " aspect"
           : item.proc ? "has its own property" : "no special property"}</div>
       </div>
       <div class="acts">
-        ${pool.length ? `<button class="btn sm primary" onclick="doApplyAspect('${item.uid}', ${0})">Etch ${pool[0].name}</button>` : ""}
+        ${pool.length ? `<button class="btn sm primary" onclick="doApplyAspect('${item.uid}', ${pick})">Etch ${pool[pick].name}</button>` : ""}
         ${has ? `<button class="btn sm" onclick="doRemoveAspect('${item.uid}')">Remove</button>` : ""}
       </div>
     </div>`;

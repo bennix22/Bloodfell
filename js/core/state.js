@@ -166,6 +166,33 @@ function loadGame() {
 }
 
 /* Fills in anything a newer version added, so old saves keep working. */
+/* An older build let players bypass tier requirements (spend low, spend high,
+   refund low). The bypass is fixed going forward, but a save from back then may
+   still hold points in tiers it never legitimately reached. This walks each tree
+   and refunds any talent whose tier requirement isn't met by the tree's total,
+   highest tier first, until the allocation is legal again. Refunded points return
+   to the pool automatically (available = earned - spent). Only ever removes points
+   that are genuinely unreachable, so a legitimate build is left untouched. */
+function sanitizeTalents(save) {
+  if (!save || !save.talents || typeof TALENT_TREES === "undefined") return;
+  const treePoints = tree => tree.talents.reduce((n, t) => n + (save.talents[t.id] || 0), 0);
+  for (const tree of TALENT_TREES) {
+    let guard = 0;
+    while (guard++ < 999) {
+      const pts = treePoints(tree);
+      let violator = null;
+      for (const t of tree.talents) {
+        if ((save.talents[t.id] || 0) > 0 && pts < (t.tier - 1) * 5) {
+          if (!violator || t.tier > violator.tier) violator = t;
+        }
+      }
+      if (!violator) break;
+      save.talents[violator.id]--;
+      if (!save.talents[violator.id]) delete save.talents[violator.id];
+    }
+  }
+}
+
 function migrate(save) {
   const base = freshSave();
   const out = Object.assign(base, save);
@@ -179,6 +206,7 @@ function migrate(save) {
   if (!out.descent) out.descent = { active: false, floor: 0, boons: {}, pendingChoices: null, best: 0 };
   if (!out.run) out.run = { realmId: null, depth: 0 };
   if (!out.vitals) out.vitals = { hp: null, mana: null };
+  sanitizeTalents(out);
   return out;
 }
 
