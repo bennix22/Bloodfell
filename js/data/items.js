@@ -42,6 +42,10 @@ const RARITIES = {
   rare:      { name: "Rare",      color: "#4a7fb5", budget: 1.35, stats: 3, salvage: 4, weight: 13 },
   epic:      { name: "Epic",      color: "#8a5fb0", budget: 1.75, stats: 4, salvage: 8, weight: 4.2 },
   legendary: { name: "Legendary", color: "#c8873a", budget: 2.20, stats: 5, salvage: 16, weight: 0.8 },
+  /* Set pieces carry a set bonus, so they get their own rarity and colour. Same
+     power budget as a Legendary; never randomly rolled (weight 0) \u2014 they only
+     drop from the bosses that grant them. */
+  set:       { name: "Set",       color: "#46c07a", budget: 2.20, stats: 5, salvage: 16, weight: 0 },
   /* Uniques are never rolled — weight 0 keeps them out of every random table.
      They exist only as the hand-written entries in js/data/uniques.js. */
   unique:    { name: "Unique",    color: "#d2536b", budget: 2.55, stats: 5, salvage: 30, weight: 0 },

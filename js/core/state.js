@@ -97,7 +97,7 @@ function freshSave() {
     unlockedRaids: [],
 
     settings: {
-      autoGrind: false,
+      autoGrind: true,
       speed: 2,           // 1 = real time, 2 = double, 4 = quadruple
       autoPotion: true,
       potionThreshold: 40,   // use a health potion below this % HP

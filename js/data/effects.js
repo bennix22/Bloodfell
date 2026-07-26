@@ -113,6 +113,7 @@ const PROC_POOL = {
 const PROC_TIERS = {
   epic:      { chance: [8, 14], potency: [0.8, 1.0] },
   legendary: { chance: [12, 20], potency: [1.0, 1.35] },
+  set:       { chance: [12, 20], potency: [1.0, 1.35] },
 };
 
 function describeEffect(inst) {

@@ -9,11 +9,23 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.0.2";
+const VERSION = "1.1.0";
 
 const CHANGELOG = [
   {
-    v: "1.0.2", date: "current",
+    v: "1.1.0", date: "current",
+    title: "1.1.0 — quality of life",
+    lines: [
+      "Pause button, next to Stop: freezes the fight in place so you can read the combat log, without ending your run.",
+      "The deepest talent tiers are now sharper picks. Tier V lets you invest in 2 different talents, Tier VI and VII in 1 each — you can still max the ranks of the ones you choose. (A build made before this change is left alone until you reset.)",
+      "Auto-salvage now goes all the way up: sweep commons, up to rares, up to epics, or everything. Uniques and set pieces are always kept, never swept.",
+      "Set items now have their own rarity and colour — a distinct emerald green — instead of being shown as Legendary.",
+      "Comparing an item now lays the tooltips out side by side: what you have equipped on the left, the new item on the right. For rings and trinkets, both worn pieces are shown, with the new one on the right.",
+      "Auto-grind is now on by default for new characters.",
+    ],
+  },
+  {
+    v: "1.0.2", date: "",
     title: "1.0.2 — more fixes",
     lines: [
       "Aspects: you can now choose which aspect to etch — click one to select it, then etch it onto any item. Uniques no longer appear in the etch list (they can't be reshaped), and an item that already carries an aspect is now clearly marked.",

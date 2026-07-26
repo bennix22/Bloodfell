@@ -172,6 +172,9 @@ const AUTO_SALVAGE_SETS = {
   off: [],
   common: ["common"],
   uncommon: ["common", "uncommon"],
+  rare: ["common", "uncommon", "rare"],
+  epic: ["common", "uncommon", "rare", "epic"],
+  all: ["common", "uncommon", "rare", "epic", "legendary"],
 };
 
 function runAutoSalvage() {
@@ -394,6 +397,15 @@ function tierUnlocked(treeId, tier) {
   return pointsInTree(treeId) >= (tier - 1) * 5;
 }
 
+// The deepest tiers are meant to be a sharp, defining pick rather than a broad
+// spread: you may invest in at most this many different talents per tier. Tiers
+// below V are unlimited. (You can still max the ranks of the ones you do choose.)
+const TIER_CHOICE_LIMIT = { 5: 2, 6: 1, 7: 1 };
+
+function talentsChosenInTier(tree, tier) {
+  return tree.talents.filter(x => x.tier === tier && (S.talents[x.id] || 0) > 0).length;
+}
+
 function canSpendTalent(talentId) {
   const t = talentById(talentId);
   if (!t) return { ok: false, msg: "Unknown talent." };
@@ -403,6 +415,11 @@ function canSpendTalent(talentId) {
   if ((S.talents[talentId] || 0) >= t.max) return { ok: false, msg: "Already at maximum rank." };
   if (!tierUnlocked(tree.id, t.tier)) {
     return { ok: false, msg: `Requires ${(t.tier - 1) * 5} points in ${tree.name}.` };
+  }
+  // deep tiers cap how many different talents you may invest in
+  const limit = TIER_CHOICE_LIMIT[t.tier];
+  if (limit && (S.talents[talentId] || 0) === 0 && talentsChosenInTier(tree, t.tier) >= limit) {
+    return { ok: false, msg: `This tier allows only ${limit} talent${limit > 1 ? "s" : ""}. Refund one first.` };
   }
   return { ok: true };
 }

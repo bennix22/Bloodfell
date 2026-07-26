@@ -94,7 +94,7 @@ const SET_PIECE_NAMES = {
    They drop often, because needing five specific pieces from five specific
    bosses is already the grind. */
 const SET_DROP_CHANCE = 0.14;
-const SET_RARITY = "legendary";
+const SET_RARITY = "set";
 
 function setById(id) { return SETS.find(s => s.id === id) || null; }
 

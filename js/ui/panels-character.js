@@ -197,6 +197,9 @@ function renderInventory() {
           <option value="off" ${S.settings.autoSalvage === "off" ? "selected" : ""}>nothing</option>
           <option value="common" ${S.settings.autoSalvage === "common" ? "selected" : ""}>commons</option>
           <option value="uncommon" ${S.settings.autoSalvage === "uncommon" ? "selected" : ""}>commons and uncommons</option>
+          <option value="rare" ${S.settings.autoSalvage === "rare" ? "selected" : ""}>up to rares</option>
+          <option value="epic" ${S.settings.autoSalvage === "epic" ? "selected" : ""}>up to epics</option>
+          <option value="all" ${S.settings.autoSalvage === "all" ? "selected" : ""}>everything (keeps uniques & sets)</option>
         </select>
         <span style="color:var(--dim);font-family:var(--mono);font-size:11px">
           uniques and anything rarer are never touched</span>

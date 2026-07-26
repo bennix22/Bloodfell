@@ -107,12 +107,21 @@ const Tooltip = {
     const { item, compare } = this.current;
     const comparing = this.shiftHeld && compare;
 
-    let html = tipCard(item, comparing ? compare : null);
+    let html;
     if (comparing) {
-      html += `<div class="tip-vs">currently worn</div>` + tipCard(compare, null, true);
-    } else if (compare) {
-      html += `<div class="tip-hint">hold <b>Shift</b> to compare with what you are wearing</div>`;
+      // worn item(s) for this slot on the left (both rings/trinkets when relevant),
+      // the hovered item on the right, deltas measured against the piece it replaces
+      const worn = slotsForItem(item).map(t => S.equipment[t]).filter(Boolean);
+      const replaces = bestWornFor(item);
+      const wornCols = worn.map(w =>
+        `<div class="tip-col"><div class="tip-vs">worn</div>${tipCard(w, null, true)}</div>`).join("");
+      const newCol = `<div class="tip-col"><div class="tip-vs newvs">new</div>${tipCard(item, replaces)}</div>`;
+      html = `<div class="tip-compare-row">${wornCols}${newCol}</div>`;
+    } else {
+      html = tipCard(item, null);
+      if (compare) html += `<div class="tip-hint">hold <b>Shift</b> to compare with what you are wearing</div>`;
     }
+    this.el.className = "tip" + (comparing ? " wide" : "");
     this.el.innerHTML = html;
     this.el.style.display = "block";
     this.place(this.lastXY.x, this.lastXY.y);

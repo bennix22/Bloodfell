@@ -49,8 +49,10 @@ function renderTalents() {
       </div>`;
     }).join("");
 
+    const limit = TIER_CHOICE_LIMIT[tier];
+    const chosenNote = limit ? ` <span class="tierlimit">${talentsChosenInTier(tree, tier)}/${limit} chosen</span>` : "";
     tiers += `<div class="tier ${open ? "open" : ""}">
-      <div class="tierhead">Tier ${tier} ${need ? `\u2014 needs ${need} points in ${tree.name}` : ""}</div>
+      <div class="tierhead">Tier ${tier} ${need ? `\u2014 needs ${need} points in ${tree.name}` : ""}${chosenNote}</div>
       <div class="talentgrid">${talents}</div>
     </div>`;
   }

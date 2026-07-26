@@ -103,11 +103,11 @@ function frame(now) {
   const dt = lastFrame ? Math.min((now - lastFrame) / 1000, 0.25) : 0;
   lastFrame = now;
 
-  if (Combat.active) {
+  if (Combat.active && !UI.paused) {
     Combat.advance(dt);
     UI.tickCombat(false);
     UI.renderCharCard();
-  } else if (pendingNext > 0) {
+  } else if (pendingNext > 0 && !UI.paused) {
     pendingNext -= dt;
     // the potion cooldown keeps recovering between fights, not only during them
     if (S.vitals.potionCd > 0) S.vitals.potionCd = Math.max(0, S.vitals.potionCd - dt);

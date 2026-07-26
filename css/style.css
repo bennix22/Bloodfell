@@ -32,6 +32,7 @@
   --r-rare:      #4a7fb5;
   --r-epic:      #8a5fb0;
   --r-legendary: #c8873a;
+  --r-set: #46c07a;
   --r-unique:    #d2536b;
 
 
@@ -446,6 +447,7 @@ button { font-family: inherit; }
 .r-rare      { color: var(--r-rare); }
 .r-epic      { color: var(--r-epic); }
 .r-legendary { color: var(--r-legendary); text-shadow: 0 0 10px rgba(200,135,58,0.35); }
+.r-set { color: var(--r-set); text-shadow: 0 0 10px rgba(70,192,122,0.35); }
 .r-unique    {
   color: var(--r-unique);
   text-shadow: 0 0 12px rgba(210,83,107,0.50);
@@ -457,6 +459,7 @@ button { font-family: inherit; }
 .b-rare      { border-left-color: var(--r-rare) !important; }
 .b-epic      { border-left-color: var(--r-epic) !important; }
 .b-legendary { border-left-color: var(--r-legendary) !important; }
+.b-set { border-left-color: var(--r-set) !important; }
 .b-unique    {
   border-left-color: var(--r-unique) !important;
   box-shadow: inset 0 0 24px rgba(210,83,107,0.09);
@@ -467,6 +470,7 @@ button { font-family: inherit; }
 .r-border-rare      { border-color: var(--r-rare) !important; }
 .r-border-epic      { border-color: var(--r-epic) !important; }
 .r-border-legendary { border-color: var(--r-legendary) !important; }
+.r-border-set { border-color: var(--r-set) !important; }
 .r-border-unique    {
   border-color: var(--r-unique) !important;
   box-shadow: inset 0 0 18px rgba(210,83,107,0.10);
@@ -569,6 +573,7 @@ button { font-family: inherit; }
   text-transform: uppercase; color: var(--dim); margin-bottom: 7px;
 }
 .tier.open .tierhead { color: var(--brass); }
+.tierlimit { color: var(--brass-hi); margin-left: 4px; }
 .talentgrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); gap: 7px; }
 
 .talent {
@@ -654,6 +659,13 @@ button { font-family: inherit; }
   max-width: 320px; display: flex; flex-direction: column; gap: 0;
   filter: drop-shadow(0 10px 26px rgba(0,0,0,0.7));
 }
+.tip.wide { max-width: none; }
+.tip-compare-row { display: flex; gap: 8px; align-items: flex-start; }
+.tip-col { width: 212px; }
+.tip-col .tip-vs {
+  background: transparent; border: 0; padding: 0 2px 5px; text-align: left;
+}
+.tip-col .tip-vs.newvs { color: var(--brass-hi); }
 .tip-card {
   background: var(--pitch); border: 1px solid var(--edge-hi);
   border-radius: var(--radius); padding: 11px 13px;

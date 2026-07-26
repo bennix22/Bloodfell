@@ -95,6 +95,7 @@ function arenaHtml() {
     <div style="margin-top:12px" class="chronicle" id="chronicle"></div>
     <div class="ctrlbar" style="margin:12px 0 0">
       <button class="btn" onclick="stopFighting()">Stop</button>
+      <button class="btn" id="pausebtn" onclick="togglePause()">${UI.paused ? "Resume" : "Pause"}</button>
       ${S.run.realmId ? `<button class="btn" onclick="doRetreat()">Retreat and recover</button>` : ""}
       <span id="fightstatus" style="color:var(--dim);font-family:var(--mono);font-size:11px"></span>
     </div>
@@ -254,9 +255,20 @@ function startRealm(id) {
 function stopFighting() {
   Combat.stop();
   UI.grind = null;
+  UI.paused = false;
   S.settings.autoGrind = false;
   saveGame();
   UI.render();
+}
+
+/* Freezes the fight in place so the combat log can be read, without ending the run.
+   The frame loop stops advancing while paused; we only flip the button label and
+   repaint the current state rather than re-rendering (which would blank the arena). */
+function togglePause() {
+  UI.paused = !UI.paused;
+  const btn = document.getElementById("pausebtn");
+  if (btn) btn.textContent = UI.paused ? "Resume" : "Pause";
+  if (Combat.active) UI.tickCombat(true);
 }
 
 /* Walking out restores you but abandons the depth you had built. */
