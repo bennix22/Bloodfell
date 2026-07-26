@@ -29,7 +29,7 @@ const UNIQUES = [
     name: "The Blood Pact",
     flavour: "Signed in the only ink that was ever binding.",
     slot: "trinket", ilvl: 44, boss: "r2b3", chance: 0.028,
-    stats: { sta: 260, str: 54, agi: 54 },
+    stats: { str: 52, agi: 52, sta: 251 },
     passive: {
       id: "blood_price",
       name: "Blood Price",
@@ -277,7 +277,7 @@ const UNIQUES = [
     name: "The Weight of Years",
     flavour: "Heavier every time it is picked up. Nobody has put it down.",
     slot: "shoulders", ilvl: 46, boss: "r3b5", chance: 0.022,
-    stats: { str: 105, sta: 131, armor: 353, thorns: 16 },
+    stats: { str: 104, sta: 130, armor: 353, thorns: 16 },
     passive: {
       id: "weight_of_years",
       name: "Accumulated",

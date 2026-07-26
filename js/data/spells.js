@@ -53,6 +53,14 @@ const SPELLS = [
     cd: 60, manaPct: 11, buff: { mods: { allDmg: 35, haste: 20, lifesteal: 5 }, duration: 15 },
     desc: "+35% damage, +20% Haste and 5% lifesteal for 15 seconds." },
 
+  { id: "sp_w6", tree: "warrior", req: 30, name: "Ruinous Cleave", type: "damage", school: "phys",
+    scale: "weapon", coef: 2.4, cd: 20, manaPct: 9,
+    desc: "A single, ruinous arc. 440% weapon damage." },
+
+  { id: "sp_w7", tree: "warrior", req: 35, name: "Cataclysmic Slam", type: "damage", school: "phys",
+    scale: "weapon", coef: 3.6, cd: 30, manaPct: 12, execBonus: 1.5,
+    desc: "The ground splits. 650% weapon damage, half again as much to the wounded." },
+
   /* ------------------------------------------------------------------ PALADIN */
   { id: "sp_p1", tree: "paladin", req: 5, name: "Verdict", type: "damage", school: "magic",
     scale: "str", coef: 1.32, cd: 7, manaPct: 4.5,
@@ -73,6 +81,14 @@ const SPELLS = [
   { id: "sp_p5", tree: "paladin", req: 25, name: "Zealot's Fury", type: "buff",
     cd: 70, manaPct: 12, buff: { mods: { magicDmg: 30, crit: 15, healPct: 25 }, duration: 16 },
     desc: "+30% magic damage, +15% critical strike and +25% healing for 16 seconds." },
+
+  { id: "sp_p6", tree: "paladin", req: 30, name: "Divine Storm", type: "damage", school: "magic",
+    scale: "str", coef: 2.1, cd: 18, manaPct: 9,
+    desc: "A whirl of holy fire scaling with Strength." },
+
+  { id: "sp_p7", tree: "paladin", req: 35, name: "Wrath of the Heavens", type: "damage", school: "magic",
+    scale: "str", coef: 3.2, cd: 32, manaPct: 12,
+    desc: "Calls the sky down. Enormous holy damage scaling with Strength." },
 
   /* --------------------------------------------------------------------- MAGE */
   { id: "sp_m1", tree: "mage", req: 5, name: "Rimeshard", type: "damage", school: "magic",
@@ -95,6 +111,14 @@ const SPELLS = [
     scale: "int", coef: 4.4, cd: 30, manaPct: 14,
     desc: "One very large problem for the target. Enormous Intellect scaling." },
 
+  { id: "sp_m6", tree: "mage", req: 30, name: "Meteor", type: "damage", school: "magic",
+    scale: "int", coef: 5.6, cd: 20, manaPct: 11,
+    desc: "A falling rock the size of a house. Massive Intellect scaling." },
+
+  { id: "sp_m7", tree: "mage", req: 35, name: "Supernova", type: "damage", school: "magic",
+    scale: "int", coef: 8.2, cd: 34, manaPct: 15,
+    desc: "A star, ended, at the target's feet. Colossal Intellect scaling." },
+
   /* -------------------------------------------------------------------- ROGUE */
   { id: "sp_r1", tree: "rogue", req: 5, name: "Vile Cut", type: "damage", school: "phys",
     scale: "weapon", coef: 0.94, cd: 5, manaPct: 3.5,
@@ -116,6 +140,14 @@ const SPELLS = [
     cd: 65, manaPct: 11, buff: { mods: { critDmg: 60, dodge: 20, physDmg: 20 }, duration: 14 },
     desc: "+60% critical damage, +20% Dodge and +20% physical damage for 14 seconds." },
 
+  { id: "sp_r6", tree: "rogue", req: 30, name: "Death Mark", type: "damage", school: "phys",
+    scale: "weapon", coef: 2.4, cd: 18, manaPct: 9, execBonus: 1.6,
+    desc: "A killing blow to a marked throat. 440% weapon damage, more to the wounded." },
+
+  { id: "sp_r7", tree: "rogue", req: 35, name: "Thousand Cuts", type: "dot", school: "phys",
+    scale: "weapon", coef: 3.9, cd: 28, manaPct: 12, duration: 10, ticks: 5,
+    desc: "Too many wounds to count. 710% weapon damage over 10 seconds." },
+
   /* ------------------------------------------------------------------- PRIEST */
   { id: "sp_s1", tree: "priest", req: 5, name: "Censure", type: "damage", school: "magic",
     scale: "spi", coef: 1.26, cd: 6, manaPct: 4,
@@ -136,4 +168,12 @@ const SPELLS = [
   { id: "sp_s5", tree: "priest", req: 25, name: "Choir of the Fallen", type: "heal",
     scale: "spi", coef: 9.0, cd: 50, manaPct: 13, buff: { mods: { magicDmg: 25, dr: 10 }, duration: 15 },
     desc: "A large heal, plus +25% magic damage and 10% damage reduction for 15 seconds." },
+
+  { id: "sp_s6", tree: "priest", req: 30, name: "Shadow Word: Ruin", type: "dot", school: "magic",
+    scale: "spi", coef: 4.4, cd: 16, manaPct: 9, duration: 12, ticks: 6,
+    desc: "A word that unmakes. Shadow damage over 12 seconds, scaling with Spirit." },
+
+  { id: "sp_s7", tree: "priest", req: 35, name: "Apotheosis", type: "buff",
+    cd: 60, manaPct: 13, buff: { mods: { magicDmg: 35, haste: 15, lifesteal: 5, healPct: 20 }, duration: 16 },
+    desc: "+35% shadow damage, +15% Haste, +5% lifesteal and +20% healing for 16 seconds." },
 ];

@@ -24,7 +24,7 @@ function renderTalents() {
   }).join("");
 
   let tiers = "";
-  for (let tier = 1; tier <= 5; tier++) {
+  for (let tier = 1; tier <= 7; tier++) {
     const need = (tier - 1) * 5;
     const open = pointsInTree(tree.id) >= need;
     const talents = tree.talents.filter(t => t.tier === tier).map(t => {

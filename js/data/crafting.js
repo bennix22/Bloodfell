@@ -19,6 +19,7 @@ const MATERIALS = {
   m_ore3: { name: "Grave Silver Ore", tier: 3, cls: "metal", value: 34 },
   m_ore4: { name: "Voidsteel Ore", tier: 4, cls: "metal", value: 96 },
   m_ore5: { name: "Godbone Shard", tier: 5, cls: "metal", value: 260 },
+  m_ore6: { name: "Doomforged Ingot", tier: 6, cls: "metal", value: 640 },
 
   // --- hide and cloth
   m_hide1: { name: "Tattered Hide", tier: 1, cls: "hide", value: 3 },
@@ -26,6 +27,7 @@ const MATERIALS = {
   m_hide3: { name: "Wraithweave", tier: 3, cls: "hide", value: 34 },
   m_hide4: { name: "Shadowsilk", tier: 4, cls: "hide", value: 96 },
   m_hide5: { name: "Astral Weave", tier: 5, cls: "hide", value: 260 },
+  m_hide6: { name: "Gravemourn Silk", tier: 6, cls: "hide", value: 640 },
 
   // --- wood (hafts, staves, shield frames)
   m_wood1: { name: "Witherwood", tier: 1, cls: "wood", value: 2 },
@@ -33,6 +35,7 @@ const MATERIALS = {
   m_wood3: { name: "Ghostoak", tier: 3, cls: "wood", value: 26 },
   m_wood4: { name: "Soulwood", tier: 4, cls: "wood", value: 74 },
   m_wood5: { name: "Nether Ash", tier: 5, cls: "wood", value: 200 },
+  m_wood6: { name: "Doomroot", tier: 6, cls: "wood", value: 500 },
 
   // --- herbs (alchemy only)
   m_herb1: { name: "Witherleaf", tier: 1, cls: "herb", value: 3 },
@@ -40,6 +43,7 @@ const MATERIALS = {
   m_herb3: { name: "Emberroot", tier: 3, cls: "herb", value: 34 },
   m_herb4: { name: "Palefrond", tier: 4, cls: "herb", value: 96 },
   m_herb5: { name: "Voidblossom", tier: 5, cls: "herb", value: 260 },
+  m_herb6: { name: "Corpselily", tier: 6, cls: "herb", value: 640 },
 
   // --- essence (uncommon drop, gates the good recipes)
   m_ess1: { name: "Dim Essence", tier: 1, cls: "essence", value: 18 },
@@ -47,6 +51,7 @@ const MATERIALS = {
   m_ess3: { name: "Grim Essence", tier: 3, cls: "essence", value: 170 },
   m_ess4: { name: "Void Essence", tier: 4, cls: "essence", value: 460 },
   m_ess5: { name: "Astral Essence", tier: 5, cls: "essence", value: 1200 },
+  m_ess6: { name: "Doom Essence", tier: 6, cls: "essence", value: 3000 },
 
   // --- universal, salvage only
   m_dust: { name: "Arcane Dust", tier: 0, cls: "dust", value: 40 },
@@ -59,6 +64,7 @@ const TIER_MATS = {
   3: { metal: "m_ore3", hide: "m_hide3", wood: "m_wood3", herb: "m_herb3", essence: "m_ess3" },
   4: { metal: "m_ore4", hide: "m_hide4", wood: "m_wood4", herb: "m_herb4", essence: "m_ess4" },
   5: { metal: "m_ore5", hide: "m_hide5", wood: "m_wood5", herb: "m_herb5", essence: "m_ess5" },
+  6: { metal: "m_ore6", hide: "m_hide6", wood: "m_wood6", herb: "m_herb6", essence: "m_ess6" },
 };
 
 /* What a forged item comes out as. Crafting used to guarantee Rare, which made
@@ -146,6 +152,7 @@ const POTIONS = [
   { id: "po_h2", name: "Clotted Red Draught", tier: 2, kind: "heal", pct: 40, req: 13, gold: 90, mats: { m_herb2: 3, m_ess2: 1 } },
   { id: "po_h3", name: "Gravebloom Tonic", tier: 3, kind: "heal", pct: 50, req: 24, gold: 300, mats: { m_herb3: 3, m_ess3: 1 } },
   { id: "po_h4", name: "Palefrond Restorative", tier: 4, kind: "heal", pct: 62, req: 34, gold: 900, mats: { m_herb4: 3, m_ess4: 1 } },
+  { id: "po_h5", name: "Corpselily Elixir", tier: 6, kind: "heal", pct: 74, req: 58, gold: 2600, mats: { m_herb6: 3, m_ess6: 1 } },
   { id: "po_h5", name: "Voidblossom Elixir", tier: 5, kind: "heal", pct: 75, req: 43, gold: 2600, mats: { m_herb5: 3, m_ess5: 1 } },
 
   // --- mana

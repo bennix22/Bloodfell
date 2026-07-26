@@ -9,9 +9,22 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "0.9.5";
+const VERSION = "1.0.0";
 
 const CHANGELOG = [
+  {
+    v: "1.0.0", date: "current",
+    title: "1.0 — the world doubles in size",
+    lines: [
+      "The level cap is now 75. Every level from 10 onward still grants a talent point, so a level-75 character has far more to spend.",
+      "Nine new realms, from Sunless Reach down to The Last Dark (levels 52\\u201375), each with its own enemies and a new tier of crafting materials.",
+      "Two new raids and ten new bosses, ending with Erebus, the Last Dark \\u2014 the thing at the bottom of everything, and the new hardest fight in the game.",
+      "Two new talent rows (tiers 6 and 7) on every tree, reached by spending 25 and 30 points in a tree \\u2014 deep specialization now pays off with true capstones.",
+      "Ten new spells, one pair per tree, unlocked at 30 and 35 points spent. Ultimates like Supernova, Apotheosis and Cataclysmic Slam.",
+      "Dozens of new handcrafted drops across the new bosses, all on the item curve, plus realm gear that now climbs to item level 75.",
+      "Your save carries over: same character, same gear, same progress, with a lot more world past where you were standing.",
+    ],
+  },
   {
     v: "0.9.5", date: "current",
     title: "Potion cooldown fix",
