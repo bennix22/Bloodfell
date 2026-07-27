@@ -694,12 +694,17 @@ function renderSettings() {
    passive that changes a combat rule is only interesting if you know it is
    there to chase. Nothing here is a spoiler you could not read off a tooltip. */
 function renderUniques() {
-  const owned = new Set();
+  /* Anywhere a Unique can sit counts as found: worn, in the bag, or put away in
+     the bank. Say WHICH, because "I know I have that one somewhere" is the whole
+     reason to look at this page. */
+  const where = {};
   for (const slot of SLOTS) {
     const it = S.equipment[slot.key];
-    if (it && it.uniqueId) owned.add(it.uniqueId);
+    if (it && it.uniqueId) where[it.uniqueId] = "worn";
   }
-  for (const it of S.inventory) if (it.uniqueId) owned.add(it.uniqueId);
+  for (const it of S.inventory) if (it.uniqueId && !where[it.uniqueId]) where[it.uniqueId] = "bag";
+  for (const it of (S.bank || [])) if (it.uniqueId && !where[it.uniqueId]) where[it.uniqueId] = "bank";
+  const owned = new Set(Object.keys(where));
 
   const cards = UNIQUES.map(u => {
     const has = owned.has(u.id);
@@ -713,7 +718,8 @@ function renderUniques() {
       <div class="ptext">${u.passive.text}</div>
       <div class="flav">${u.flavour}</div>
       <div style="margin-top:9px">
-        ${has ? `<span class="have">in your possession</span>`
+        ${has ? `<span class="have">${where[u.id] === "worn" ? "worn"
+                  : where[u.id] === "bank" ? "in your bank" : "in your bags"}</span>`
               : `<span class="tag">${dead ? `${boss.name} slain ${dead}\u00D7` : "boss not yet defeated"}</span>`}
       </div>
     </div>`;

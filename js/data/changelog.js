@@ -9,11 +9,19 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.8.4";
+const VERSION = "1.8.5";
 
 const CHANGELOG = [
   {
-    v: "1.8.4", date: "current",
+    v: "1.8.5", date: "current",
+    title: "1.8.5 — the bank counts",
+    lines: [
+      "Uniques kept in the bank now show as found on the Uniques page, and each entry says where it is \u2014 worn, in your bags, or in your bank.",
+      "Set pieces kept in the bank now count as held on set tooltips too, so the piece list no longer looks incomplete when the missing piece is sitting in storage.",
+    ],
+  },
+  {
+    v: "1.8.4", date: "",
     title: "1.8.4 — raid bosses fight again",
     lines: [
       "Fixed: challenging a raid boss did nothing and threw an error. Closing the merchant in 1.7.0 removed the code that starts a boss fight along with it. Raids were unplayable in 1.7.0 through 1.8.3; they work again now.",

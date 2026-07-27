@@ -353,8 +353,10 @@ function setTooltipBlock(setId) {
     const it = S.equipment[slot.key];
     if (it && it.setId === setId) { worn[it.setIndex] = true; count++; }
   }
+  // held but not worn: the bag and the bank both count
   const owned = {};
   for (const it of S.inventory) if (it.setId === setId) owned[it.setIndex] = true;
+  for (const it of (S.bank || [])) if (it.setId === setId) owned[it.setIndex] = true;
 
   const pieces = SET_PIECE_NAMES[setId].map((n, i) =>
     `<div class="tip-setpiece ${worn[i] ? "on" : (owned[i] ? "held" : "")}">${n}</div>`).join("");
