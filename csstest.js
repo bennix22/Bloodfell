@@ -34,11 +34,10 @@ S.equipment.trinket1=makeUnique2(UNIQUES[0]);
 rar.forEach(r=>S.inventory.push(generateItem({ilvl:50,rarity:r})));
 S.inventory.push(makeUnique2(UNIQUES[1]));
 S.talents={w26:3,w28:3};
-tickMerchant();
 `);
 
 const seen=new Set();
-for(const route of ['realms','raids','character','inventory','talents','skills','blacksmith','alchemy','enchanting','materials','uniques','merchant','settings']){
+for(const route of ['realms','raids','character','inventory','talents','skills','blacksmith','gemcrafting','alchemy','enchanting','materials','uniques','bank','settings']){
   W.eval(`UI.go('${route}')`);
   const html=W.document.getElementById('main').innerHTML;
   for(const m of html.matchAll(/class="([^"]+)"/g))

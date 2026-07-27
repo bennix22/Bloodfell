@@ -51,8 +51,8 @@ const EXPORTS = ['REALMS','RAIDS','SLOTS','SLOT_TYPES','RARITIES','RARITY_ORDER'
   'realmById','raidById','bossById','applyBossUnlocks','xpToNext','totalTalentPoints',
   'equipItem','unequipItem','sellItem','salvageItem','craftBlacksmith','brewPotion',
   'EFFECTS','PROC_POOL','PROC_TIERS','describeEffect','effectName','Sound','Tooltip',
-  'tickMerchant','forceMerchantRefresh','buyFromMerchant','merchantForceCost','rollMerchantStock',
-  'runAutoSalvage','isTwoHanded','collectEffects','CRAFT_RARITY','renderMerchant','renderSettings',
+  'runAutoSalvage','isTwoHanded','collectEffects','CRAFT_RARITY','renderSettings',
+  'cutGem','canCutGem','gemById','cutCost','GEM_TYPES','ROUGH_COLOURS','migrateGemKey','remapGems','renderGemcrafting',
   'UNIQUES','PASSIVES','makeUnique2','uniqueById','collectPassives','beginRun','storeVitals',
   'currentVitals','retreatFromRun','THEMES','Theme','derivePalette','mixHex','luminance',
   'DEPTH_POWER_PER_KILL','DEPTH_FIND_PER_KILL','renderUniques','statClass','DEFAULT_CUSTOM',
@@ -89,17 +89,17 @@ function ok(label, cond, extra) {
 
 console.log('=== LOAD ===');
 ok('all scripts parsed', errors.length === 0, errors.join(' | '));
-ok('REALMS present', W.REALMS && W.REALMS.length === 20, `${W.REALMS && W.REALMS.length} realms`);
-ok('RAIDS present', W.RAIDS && W.RAIDS.length === 3);
+ok('REALMS present', W.REALMS && W.REALMS.length === 29, `${W.REALMS && W.REALMS.length} realms`);
+ok('RAIDS present', W.RAIDS && W.RAIDS.length === 5, `${W.RAIDS && W.RAIDS.length} raids`);
 ok('five talent trees', W.TALENT_TREES.length === 5);
   ok('trees are substantial', W.TALENT_TREES.every(t => t.talents.length >= 30), W.TALENT_TREES.map(t => t.talents.length).join('/') + ' talents');
   ok('all talent ids unique', (() => { const all = W.TALENT_TREES.flatMap(t => t.talents.map(x => x.id)); return new Set(all).size === all.length; })());
-ok('spells 25', W.SPELLS.length === 25);
+ok('spells present', W.SPELLS.length === 35, W.SPELLS.length + ' spells');
 
 console.log('\n=== BOOT ===');
 try { W.boot(); } catch (e) { errors.push('boot: ' + e.message); console.log('  boot threw: ' + e.message); }
 ok('rail rendered', !!W.document.querySelector('.rail'));
-ok('nav buttons', W.document.querySelectorAll('[data-nav]').length === 14, W.document.querySelectorAll('[data-nav]').length + ' buttons');
+ok('nav buttons', W.document.querySelectorAll('[data-nav]').length === 15, W.document.querySelectorAll('[data-nav]').length + ' buttons');
 ok('char card', !!W.document.getElementById('charcard').innerHTML.trim());
 
 console.log('\n=== EVERY PANEL RENDERS ===');
@@ -174,9 +174,9 @@ try {
 
 console.log('\n=== TALENTS ===');
 try {
-  W.S.level = 14; W.S.talents = {};
+  W.S.level = 5; W.S.talents = {};
   const avail = W.pointsAvailable();
-  ok('points available at 14', avail === 4, `${avail} points`);
+  ok('points available at 5', avail === 4, `${avail} points`);
   ok('spend works', W.spendTalent('w1').ok);
   ok('rank recorded', W.S.talents.w1 === 1);
   ok('deep tier blocked', !W.canSpendTalent('w21').ok, W.canSpendTalent('w21').msg);
@@ -309,9 +309,15 @@ try {
   W.UI.tab.talents = 'mage'; W.UI.render();
   ok('tree switch works', W.document.getElementById('main').innerHTML.includes('Arcane Study'));
   W.UI.go('blacksmith');
-  ok('blacksmith lists recipes', (W.document.getElementById('main').innerHTML.match(/reciperow/g) || []).length > 10);
+  W.S.level = 60; W.S.gold = 200000;
+  W.UI.tab.bsTier = 6; W.UI.tab.bsSlot = 'chest'; W.UI.tab.bsPrimary = 'str'; W.UI.tab.bsSecondary = 'crit'; W.UI.tab.bsQuality = 'epic'; W.UI.render();
+  const forgeHtml = () => W.document.getElementById('main').innerHTML;
+  ok('forge renders composer', forgeHtml().includes('forge-grid') && forgeHtml().includes('fp-card'));
+  ok('forge preview shows chosen primary', forgeHtml().includes('Strength'));
+  ok('forge guarantees chosen secondary', /fp-stat focus/.test(forgeHtml()) && forgeHtml().includes('Critical Strike'));
   W.UI.tab.bsSlot = 'mainhand'; W.UI.render();
-  ok('slot filter works', (W.document.getElementById('main').innerHTML.match(/reciperow/g) || []).length === 3);
+  ok('preview updates for weapon slot', forgeHtml().includes('Weapon damage'));
+  ok('tier VI is craftable now', W.CRAFT_TIERS[6] && W.CRAFT_TIERS[6].label === 'Tier VI');
   const before = W.document.querySelectorAll('.toast').length;
   W.UI.toast('test');
   ok('toast appears', W.document.querySelectorAll('.toast').length === before + 1);
@@ -402,29 +408,83 @@ try {
   ok('off-hand refused while 2h worn', !blocked.ok, blocked.msg);
 } catch (e) { ok('two-handed', false, e.message); }
 
-console.log('\n=== MERCHANT ===');
+console.log('\n=== TEMPERING, SOCKETS AND FLASKS ===');
 try {
-  W.S = W.freshSave(); W.S.level = 30; W.S.gold = 500000;
-  W.tickMerchant();
-  ok('stock generated', W.S.merchant.stock.length === 6, W.S.merchant.stock.length + ' items');
-  ok('everything is priced', W.S.merchant.stock.every(i => i.price > 0));
-  const first = W.S.merchant.stock[0];
-  const firstPrice = first.price;   // buying strips it, so capture it now
-  const goldBefore = W.S.gold;
-  const buy = W.buyFromMerchant(first.uid);
-  ok('buying works', buy.ok, buy.msg);
-  ok('gold deducted', W.S.gold === goldBefore - firstPrice, `paid ${firstPrice}g`);
-  ok('item is in the bags', W.S.inventory.some(i => i.uid === first.uid));
-  ok('price stripped once owned', !W.S.inventory.find(i => i.uid === first.uid).price);
-  ok('stock shrank', W.S.merchant.stock.length === 5);
-  const c1 = W.merchantForceCost();
-  W.forceMerchantRefresh();
-  const c2 = W.merchantForceCost();
-  ok('forced restock costs double next time', c2 === c1 * 2, `${c1} -> ${c2}`);
-  ok('restock refills the table', W.S.merchant.stock.length === 6);
-  W.S.gold = 10;
-  ok('cannot force without gold', !W.forceMerchantRefresh().ok);
-} catch (e) { ok('merchant', false, e.message); }
+  W.S = W.freshSave(); W.S.level = 60; W.S.gold = 5000000;
+  for (const id in W.MATERIALS) W.S.materials[id] = 500;
+
+  // tempering
+  const it = W.generateItem({ ilvl: 40, rarity: 'epic', slot: 'chest', primary: 'str' });
+  W.S.inventory.push(it);
+  const strBefore = it.stats.str, goldBefore = W.S.gold;
+  const t = W.temperItem(it.uid);
+  ok('tempering works', t.ok, t.msg);
+  ok('item level rose', it.ilvl === 42, 'ilvl ' + it.ilvl);
+  ok('stats scaled up', it.stats.str > strBefore, `${strBefore} -> ${it.stats.str}`);
+  ok('tempering costs gold', W.S.gold < goldBefore);
+  for (let i = 0; i < 4; i++) W.temperItem(it.uid);
+  ok('temper limit enforced', !W.canTemper(it.uid).ok, W.canTemper(it.uid).msg);
+
+  // uniques refuse both
+  const uq = W.makeUnique2(W.UNIQUES[0]);
+  W.S.inventory.push(uq);
+  ok('uniques cannot be tempered', !W.canTemper(uq.uid).ok);
+  ok('uniques cannot be socketed', !W.canAddSocket(uq.uid).ok);
+
+  // socketing
+  const sock = W.generateItem({ ilvl: 50, rarity: 'epic', slot: 'helm', primary: 'agi' });
+  W.S.inventory.push(sock);
+  ok('socket cut', W.addSocket(sock.uid).ok);
+  ok('socket exists and is empty', sock.sockets.length === 1 && sock.sockets[0] === null);
+  // cutting: rough gems in, stone out
+  W.S.roughGems['red:cut'] = 10;
+  W.S.roughGems['yellow:cut'] = 10;
+  W.S.roughGems['green:cut'] = 10;
+  const cutRuby = W.cutGem('ruby', 'cut', 1);
+  ok('gem cut from rough', cutRuby.ok, cutRuby.msg);
+  ok('rough consumed by the cut', W.S.roughGems['red:cut'] === 8, 'red left ' + W.S.roughGems['red:cut']);
+  ok('orange stone is crit', W.gemById('carnelian:cut').stat === 'Critical strike');
+  ok('scarlet stone is crit damage', W.gemById('garnet:cut').stat === 'Critical damage');
+  ok('mixing needs both colours', (function () {
+    W.S.roughGems = { 'red:cut': 5 };
+    return !W.canCutGem('carnelian', 'cut').ok;
+  })());
+  W.S.roughGems = { 'red:cut': 10, 'yellow:cut': 10, 'green:cut': 10 };
+  W.S.gems['ruby:cut'] = 2;
+  const set1 = W.setGem(sock.uid, 0, 'ruby:cut');
+  ok('gem set', set1.ok, set1.msg);
+  ok('gem consumed from the bag', W.S.gems['ruby:cut'] === 1);
+  W.S.equipment.helm = sock;
+  const withGem = W.computeStats();
+  W.S.equipment.helm = null;
+  const without = W.computeStats();
+  ok('gem reaches the stat sheet', withGem.str > without.str, `${without.str} -> ${withGem.str}`);
+  ok('prising a gem destroys it', W.clearSocket(sock.uid, 0).ok && sock.sockets[0] === null);
+  ok('socket cap respected', (function () {
+    const max = W.maxSocketsFor(sock);
+    while (W.canAddSocket(sock.uid).ok) W.addSocket(sock.uid);
+    return sock.sockets.length === max;
+  })(), 'epic holds ' + W.maxSocketsFor(sock));
+
+  // a gem carrying a proc merges into the effect list
+  const procItem = W.generateItem({ ilvl: 50, rarity: 'rare', slot: 'cape', primary: 'agi' });
+  W.addSocket(procItem.uid) ; // not in inventory yet, so this should fail gracefully
+  W.S.inventory.push(procItem);
+  W.addSocket(procItem.uid);
+  W.S.gems['bloodstone:cut'] = 1;
+  W.setGem(procItem.uid, 0, 'bloodstone:cut');
+  W.S.equipment.cape = procItem;
+  ok('gem proc reaches the effects list', W.computeStats().effects.some(e => e.id === 'retort'));
+
+  // flasks
+  W.S.potions['po_f_war4'] = 2;
+  const fl = W.drinkFlask('po_f_war4');
+  ok('flask drunk', fl.ok, fl.msg);
+  ok('flask is holding', !!W.S.flask && W.S.flask.id === 'po_f_war4');
+  ok('flask reaches the stat sheet', W.computeStats().allDmg > 0, 'allDmg ' + W.computeStats().allDmg);
+  W.clearFlask('test');
+  ok('flask can be lost', W.S.flask === null);
+} catch (e) { ok('tempering and sockets', false, e.message); }
 
 console.log('\n=== AUTO SALVAGE ===');
 try {
@@ -464,8 +524,7 @@ try {
 console.log('\n=== NEW PANELS RENDER ===');
 try {
   W.S = W.freshSave(); W.S.level = 30; W.S.gold = 90000;
-  W.tickMerchant();
-  for (const r of ['merchant', 'settings']) {
+  for (const r of ['bank', 'settings']) {
     W.UI.go(r);
     ok(r.padEnd(10), W.document.getElementById('main').innerHTML.length > 400);
   }
@@ -558,7 +617,7 @@ try {
 console.log('\n=== UNIQUES ===');
 try {
   W.S = W.freshSave(); W.S.level = 46;
-  ok('at least 21 uniques', W.UNIQUES.length >= 21, W.UNIQUES.length + ' uniques');
+  ok('at least 32 uniques', W.UNIQUES.length >= 32, W.UNIQUES.length + ' uniques');
   ok('all passives implemented', W.UNIQUES.every(u => W.PASSIVES[u.passive.id]));
   const it = W.makeUnique2(W.UNIQUES[0]);
   ok('rarity is unique', it.rarity === 'unique');
@@ -744,7 +803,8 @@ try {
 console.log('\n=== SETS ===');
 try {
   W.S = W.freshSave(); W.S.level = 50;
-  ok('three sets', W.SETS.length === 3, W.SETS.map(s => s.name).join(', '));
+  ok('twelve sets', W.SETS.length === 12, W.SETS.length + ' sets');
+  ok('three sets per primary', ['str','agi','int','spi'].every(k => W.SETS.filter(s => s.stat === k).length === 3), W.SETS.map(s => s.stat).sort().join(''));
   ok('five pieces each', W.SET_SLOTS.length === 5);
   ok('every raid has one', W.SETS.every(s => W.RAIDS.some(r => r.id === s.raid)));
   ok('bonuses at 2, 3 and 5', W.SETS.every(s => [2,3,5].every(n => s.bonuses[n])));
@@ -757,17 +817,30 @@ try {
   });
   ok('one piece per boss, in order', mapped.every(Boolean));
 
-  // pieces follow the build, not the set
+  // pieces carry their SET's stat, not the wearer's build, so an off-build set
+  // can tempt a character into changing how they fight
   for (const sl of W.SLOTS) W.S.equipment[sl.key] = W.generateItem({ ilvl: 52, rarity: 'epic', slot: sl.type || sl.key, primary: 'str' });
   ok('dominant primary detected', W.dominantPrimary() === 'str');
-  const piece = W.makeSetPiece(W.setPieceDef(W.SETS[2], 0));
-  ok('set piece follows the build', piece.stats.str > 0 && !piece.stats.int,
-     'strength build got a strength piece from the caster set');
+  const strSet = W.SETS.find(s => s.stat === 'str');
+  const intSet = W.SETS.find(s => s.stat === 'int');
+  const spiSet = W.SETS.find(s => s.stat === 'spi');
+  const piece = W.makeSetPiece(W.setPieceDef(strSet, 0));
+  const casterPiece = W.makeSetPiece(W.setPieceDef(intSet, 0));
+  const spiritPiece = W.makeSetPiece(W.setPieceDef(spiSet, 0));
+  ok('strength set piece is strength', piece.stats.str > 0 && !piece.stats.int);
+  ok('caster set piece stays caster on a strength build', casterPiece.stats.int > 0 && !casterPiece.stats.str,
+     'strength character still gets an Intellect piece from the caster set');
+  ok('spirit set piece carries spirit', spiritPiece.stats.spi > 0, 'spi ' + spiritPiece.stats.spi);
+  ok('every primary has an ilvl 70 set',
+     ['str','agi','int','spi'].every(k => W.SETS.some(s => s.stat === k && s.ilvl === 70)),
+     W.SETS.filter(s => s.ilvl === 70).map(s => s.stat).join(','));
   ok('set pieces are legendary', piece.rarity === W.SET_RARITY);
-  ok('set pieces keep their proc', !!piece.proc, piece.proc && piece.proc.id);
+  // procs only exist from item level 40, so check a deep set rather than an early one
+  const deepPiece = W.makeSetPiece(W.setPieceDef(W.SETS.find(s => s.ilvl === 70), 0));
+  ok('set pieces keep their proc', !!deepPiece.proc, deepPiece.proc && deepPiece.proc.id);
 
   // bonuses activate at the right counts
-  const set = W.SETS[2];
+  const set = W.SETS.find(s => s.id === 'regalia');
   for (let i = 0; i < 5; i++) {
     const d = W.setPieceDef(set, i);
     W.S.equipment[d.slot] = W.makeSetPiece(d);
@@ -778,7 +851,7 @@ try {
   }
   const st = W.computeStats();
   ok('bonuses reach the stat block', st.sets.length === 1 && st.sets[0].worn === 5);
-  ok('set procs merge with the rest', st.effects.some(e => e.id === 'execute_proc'));
+  ok('set procs merge with the rest', st.effects.some(e => e.id === set.bonuses[5].effect.id), set.bonuses[5].effect.id);
 
   // never swept by auto-salvage
   W.S.inventory = [W.makeSetPiece(W.setPieceDef(set, 0))];

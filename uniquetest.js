@@ -1,7 +1,7 @@
 const fs=require('fs'); const P='/home/claude/opus-realms/js/';
-const F=['data/realms.js','data/raids.js','data/items.js','data/talents.js','data/spells.js','data/crafting.js','data/effects.js','data/uniques.js','data/sets.js','core/sound.js','core/state.js','core/passives.js','core/character.js','core/loot.js','core/combat.js','core/actions.js','core/merchant.js','core/descent.js'];
+const F=['data/realms.js','data/raids.js','data/items.js','data/talents.js','data/spells.js','data/crafting.js','data/effects.js','data/uniques.js','data/sets.js','data/gems.js','core/sound.js','core/state.js','core/passives.js','core/character.js','core/loot.js','core/combat.js','core/actions.js','core/descent.js'];
 const src='var localStorage={getItem:()=>null,setItem:()=>{},removeItem:()=>{}};var window={},document={addEventListener:()=>{}},performance={now:()=>0};'+F.map(f=>fs.readFileSync(P+f,'utf8')).join('\n');
-const G=new Function(src+`return {getS:()=>S,setS:v=>{S=v},SLOTS,Combat,TICK,REALMS,RAIDS,UNIQUES,PASSIVES,generateItem,makeUnique2,computeStats,freshSave,rollBossLoot,bossById,equipItem,rollMerchantStock,tickMerchant,runAutoSalvage,uniqueById,collectPassives,SMOOTH_WINDOW};`)();
+const G=new Function(src+`return {getS:()=>S,setS:v=>{S=v},SLOTS,Combat,TICK,REALMS,RAIDS,UNIQUES,PASSIVES,generateItem,makeUnique2,computeStats,freshSave,rollBossLoot,bossById,equipItem,runAutoSalvage,uniqueById,collectPassives,SMOOTH_WINDOW};`)();
 Object.defineProperty(G,'S',{get:()=>G.getS(),set:v=>G.setS(v),configurable:true});
 const errs=[]; const ok=(l,c,x)=>{console.log(`  ${c?'PASS':'FAIL'}  ${l}${x?'  '+x:''}`); if(!c)errs.push(l);};
 G.S=G.freshSave(); G.S.level=46;
@@ -11,7 +11,8 @@ G.Combat.win=function(){this.active=false;}; G.Combat.lose=function(){this.activ
 const fight=(realmIdx,cap)=>{G.Combat.start('realm',G.REALMS[realmIdx]); let t=0; while(G.Combat.active&&t<(cap||120)){G.Combat.step();t+=G.TICK;} return t;};
 
 console.log('=== DEFINITIONS ===');
-ok('at least 21 uniques defined', G.UNIQUES.length>=21, G.UNIQUES.length+' items');
+ok('at least 32 uniques defined', G.UNIQUES.length>=32, G.UNIQUES.length+' items');
+ok('every raid boss has a unique', (function(){const c=new Set(G.UNIQUES.map(u=>u.boss).filter(Boolean));let miss=0;for(const rd of G.RAIDS)for(const b of rd.bosses)if(!c.has(b.id))miss++;return miss===0;})(), 'coverage');
 ok('every passive is implemented', G.UNIQUES.every(u=>G.PASSIVES[u.passive.id]),
    G.UNIQUES.filter(u=>!G.PASSIVES[u.passive.id]).map(u=>u.passive.id).join(',')||'all present');
 ok('every unique has a boss', G.UNIQUES.every(u=>G.bossById(u.boss)));
@@ -64,10 +65,9 @@ ok('smoothing improves survival', with_>=without, `${Math.round(without*100)}% -
 console.log('\n=== OTHER PASSIVES ===');
 G.S=G.freshSave(); G.S.level=46; gear(46); wear('uq_drowned_chain');
 G.Combat.start('boss',G.bossById('r3b5'));
-const cap=G.Combat.stats.maxHp*0.12;
-let biggest=0, l2=G.Combat.player.hp;
-for(let i=0;i<400&&G.Combat.active;i++){G.Combat.step(); if(G.Combat.player.hp<l2){biggest=Math.max(biggest,l2-G.Combat.player.hp); l2=G.Combat.player.hp;} else l2=G.Combat.player.hp;}
-ok('damage cap holds', biggest<=cap*1.05, `biggest hit ${biggest.toFixed(0)} vs cap ${cap.toFixed(0)}`);
+// Chain of the Drowned now reduces all incoming damage by a flat 30% (no cap)
+const reduced = G.Combat.passiveTransform('damageTaken', 10000, {});
+ok('drowned flat reduction', Math.abs(reduced - 7000) < 1, `10000 -> ${reduced.toFixed(0)} (expect 7000)`);
 
 G.S=G.freshSave(); G.S.level=46; gear(46); wear('uq_second_heart');
 G.Combat.start('boss',G.bossById('r3b5'));
@@ -107,9 +107,6 @@ G.S=G.freshSave(); G.S.level=50;
 let found=0;
 for(let i=0;i<4000;i++){ const l=G.rollBossLoot(G.bossById('r2b1'),0); if(l.items.some(x=>x.uniqueId)) found++; }
 ok('bosses drop their unique', found>0, `${(found/4000*100).toFixed(2)}% per kill (~${Math.round(4000/found)} kills)`);
-let shopFound=0;
-for(let i=0;i<800;i++){ if(G.rollMerchantStock().some(x=>x.uniqueId)) shopFound++; }
-ok('merchant stocks them rarely', shopFound>0 && shopFound<250, `${(shopFound/800*100).toFixed(1)}% of restocks have one`);
 
 console.log('\n'+'='.repeat(50));
 console.log(errs.length?'FAILURES:\n  '+errs.join('\n  '):'ALL UNIQUE TESTS PASSED');

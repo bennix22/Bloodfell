@@ -465,6 +465,26 @@ function startDescent() {
   UI.render();
 }
 
+/* Challenging a raid boss. The grind mode is anything other than "realm" or
+   "descent", which is how main.js knows to look the id up as a boss when it
+   queues the next fight. */
+function startBoss(id) {
+  const boss = bossById(id);
+  if (!boss) return;
+  // refuse a boss the player has not opened yet, the same check the button uses
+  for (const raid of RAIDS) {
+    const idx = raid.bosses.findIndex(b => b.id === id);
+    if (idx >= 0) {
+      if (!bossUnlocked(raid, idx)) return;
+      break;
+    }
+  }
+  UI.grind = { mode: "boss", id };
+  Combat.log = [];
+  Combat.start("boss", boss);
+  UI.render();
+}
+
 function chooseBoon(id) {
   const res = takeBoon(id);
   Sound.play("rare", 0);

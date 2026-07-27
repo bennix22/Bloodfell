@@ -9,11 +9,18 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.8.3";
+const VERSION = "1.8.4";
 
 const CHANGELOG = [
   {
-    v: "1.8.3", date: "current",
+    v: "1.8.4", date: "current",
+    title: "1.8.4 — raid bosses fight again",
+    lines: [
+      "Fixed: challenging a raid boss did nothing and threw an error. Closing the merchant in 1.7.0 removed the code that starts a boss fight along with it. Raids were unplayable in 1.7.0 through 1.8.3; they work again now.",
+    ],
+  },
+  {
+    v: "1.8.3", date: "",
     title: "1.8.3 — pick what you socket",
     lines: [
       "Socketing has its own item picker now. It was quietly borrowing the tempering one, which meant it always landed on whatever came first \u2014 usually the helm \u2014 with no way to change it. You can now temper one piece and socket another, and the socketing list shows each piece's socket count so you can see at a glance which has room.",
