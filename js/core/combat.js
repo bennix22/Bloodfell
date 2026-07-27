@@ -860,8 +860,8 @@ const Combat = {
         const boss = all[Math.floor((S.descent.floor / DESCENT_WARDEN_EVERY - 1) % all.length)];
         const bl = rollBossLoot(boss, st.magicFind + descentMagicFind());
         for (const it of bl.items) { S.inventory.push(it); S.tally.items++; }
-        for (const g of bl.gems || []) addGem(g, 1);
-        result.gems = (result.gems || []).concat(bl.gems || []);
+        for (const g of bl.rough || []) addRough(g, 1);
+        result.rough = (result.rough || []).concat(bl.rough || []);
         result.items = result.items.concat(bl.items);
       }
       result.floor = S.descent.floor;
@@ -879,6 +879,8 @@ const Combat = {
       const loot = rollRealmLoot(this.realm, e.level, e.lootMod, st.magicFind + depthFind);
       for (const id in loot.materials) { addMaterial(id, loot.materials[id]); }
       result.materials = loot.materials;
+      for (const g of loot.rough || []) addRough(g, 1);
+      result.rough = loot.rough || [];
       for (const it of loot.items) { S.inventory.push(it); S.tally.items++; }
       result.items = loot.items;
 
@@ -889,8 +891,8 @@ const Combat = {
 
       const loot = rollBossLoot(this.boss, st.magicFind);
       for (const it of loot.items) { S.inventory.push(it); S.tally.items++; }
-      for (const g of loot.gems || []) addGem(g, 1);
-      result.gems = loot.gems || [];
+      for (const g of loot.rough || []) addRough(g, 1);
+      result.rough = loot.rough || [];
       result.items = loot.items;
 
       if (first) result.unlocked = applyBossUnlocks(this.boss);

@@ -58,6 +58,8 @@ function freshSave() {
     inventory: [],
     /* Loose gems, counted by "type:grade" the way materials are counted. */
     gems: {},
+    /* Uncut stones from realms and raids, keyed "colour:grade". */
+    roughGems: {},
 
     /* The flask currently holding, if any: { id, name, mods }. A flask lasts a
        whole run rather than a fight, and is lost when you die or withdraw. */
@@ -214,6 +216,34 @@ function retagSetPieces(save) {
   if (save.equipment) for (const k in save.equipment) fix(save.equipment[k]);
 }
 
+/* When the gemcrafter opened, the stones were reorganised around colour: what
+   used to be a sapphire for Intellect is a topaz now, and sapphire holds Haste.
+   Remap saved stones by the stat they were collected for \u2014 in the bag and in
+   every socket \u2014 so nobody loses a gem to a rename. Built fresh rather than
+   edited in place, because two stones swap places and an in-place rename would
+   collide. */
+function remapGems(save) {
+  if (typeof migrateGemKey !== "function") return;
+
+  if (save.gems) {
+    const bag = {};
+    for (const key in save.gems) {
+      const to = migrateGemKey(key);
+      bag[to] = (bag[to] || 0) + save.gems[key];
+    }
+    save.gems = bag;
+  }
+
+  const fixSockets = it => {
+    if (it && Array.isArray(it.sockets)) {
+      it.sockets = it.sockets.map(k => (k ? migrateGemKey(k) : k));
+    }
+  };
+  (save.inventory || []).forEach(fixSockets);
+  (save.bank || []).forEach(fixSockets);
+  for (const k in save.equipment || {}) fixSockets(save.equipment[k]);
+}
+
 function migrate(save) {
   const base = freshSave();
   const out = Object.assign(base, save);
@@ -231,6 +261,8 @@ function migrate(save) {
   retagSetPieces(out);
   if (!Array.isArray(out.bank)) out.bank = [];   // saves from before the bank existed
   if (!out.gems || typeof out.gems !== "object") out.gems = {};   // before gems existed
+  if (!out.roughGems || typeof out.roughGems !== "object") out.roughGems = {};
+  remapGems(out);
   if (out.flask === undefined) out.flask = null;
   return out;
 }
@@ -336,5 +368,22 @@ function takeGem(key, qty) {
 function gemCount() {
   let n = 0;
   for (const k in S.gems) n += S.gems[k];
+  return n;
+}
+
+/* Rough gems are counted like materials, keyed "colour:grade". */
+function addRough(key, qty) {
+  S.roughGems[key] = (S.roughGems[key] || 0) + (qty || 1);
+}
+function takeRough(key, qty) {
+  const n = qty || 1;
+  if ((S.roughGems[key] || 0) < n) return false;
+  S.roughGems[key] -= n;
+  if (S.roughGems[key] <= 0) delete S.roughGems[key];
+  return true;
+}
+function roughCount() {
+  let n = 0;
+  for (const k in S.roughGems) n += S.roughGems[k];
   return n;
 }

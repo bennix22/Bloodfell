@@ -712,3 +712,39 @@ function clearFlask(reason) {
   saveGame();
   return name;
 }
+
+/* ---------------------------------------------------------------------------
+   THE GEMCRAFTER — cutting rough gems into stones.
+   The colours and ratios live in js/data/gems.js; this only spends and awards.
+   --------------------------------------------------------------------------- */
+function canCutGem(typeId, grade) {
+  const cost = cutCost(typeId, grade);
+  if (!cost) return { ok: false, msg: "No such stone." };
+  if (S.gold < cost.gold) return { ok: false, msg: "Not enough gold." };
+  for (const key in cost.rough) {
+    if ((S.roughGems[key] || 0) < cost.rough[key]) {
+      return { ok: false, msg: `Not enough ${roughName(key)}.` };
+    }
+  }
+  return { ok: true };
+}
+
+function cutGem(typeId, grade, times) {
+  const n = Math.max(1, times || 1);
+  let made = 0;
+  let name = "";
+  for (let i = 0; i < n; i++) {
+    const check = canCutGem(typeId, grade);
+    if (!check.ok) break;
+    const cost = cutCost(typeId, grade);
+    S.gold -= cost.gold;
+    for (const key in cost.rough) takeRough(key, cost.rough[key]);
+    const key = gemKey(typeId, grade);
+    addGem(key, 1);
+    name = gemById(key).name;
+    made++;
+  }
+  if (!made) return canCutGem(typeId, grade);
+  saveGame();
+  return { ok: true, msg: made > 1 ? `${made} \u00D7 ${name} cut.` : `${name} cut.` };
+}

@@ -1202,3 +1202,27 @@ input[type="range"] { accent-color: var(--brass); }
 .gemcard .gn { font-family: var(--serif); font-size: calc(12.5px * var(--fs)); }
 .gemcard .gd { font-size: calc(11px * var(--fs)); color: var(--ash); margin-top: 2px; }
 .gemcount { font-family: var(--mono); font-size: calc(10.5px * var(--fs)); color: var(--brass-hi); }
+
+/* ---- gemcrafting bench ---- */
+.roughrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 9px; }
+.roughcell {
+  display: flex; align-items: center; gap: 7px;
+  border: 1px solid var(--edge-hi); border-radius: var(--radius);
+  padding: 7px 11px; background: var(--slate); font-size: calc(12px * var(--fs));
+}
+.roughcell.none { opacity: 0.45; border-style: dashed; }
+.roughcell .rn2 { color: var(--bone); }
+.roughdot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+.roughdot.big { width: 13px; height: 13px; vertical-align: -1px; margin-right: 4px; }
+.mixchip {
+  display: inline-flex; align-items: center; gap: 4px;
+  border: 1px solid var(--edge); border-radius: var(--radius);
+  padding: 1px 6px; font-family: var(--mono); font-size: calc(10.5px * var(--fs));
+  background: var(--pitch); color: var(--bone);
+}
+.mixplus, .mixeq { color: var(--dim); font-family: var(--mono); font-size: calc(10.5px * var(--fs)); }
+.mixgold { font-family: var(--mono); font-size: calc(10.5px * var(--fs)); color: var(--brass-hi); }
+.shade {
+  font-family: var(--mono); font-size: calc(9.5px * var(--fs)); letter-spacing: 0.1em;
+  text-transform: uppercase; color: var(--dim); margin-left: 6px;
+}

@@ -9,11 +9,30 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.7.0";
+const VERSION = "1.8.1";
 
 const CHANGELOG = [
   {
-    v: "1.7.0", date: "current",
+    v: "1.8.1", date: "current",
+    title: "1.8.1 — cutting costs more",
+    lines: [
+      "Cutting a gem costs 75% more gold at every grade. Cutting stones is meant to be the thing gold is FOR, and it was too cheap to matter: a Chipped cut is now 700 gold, a Cut 4,550, and a Flawless 24,500. The two proc stones still cost two and a half times that.",
+    ],
+  },
+  {
+    v: "1.8.0", date: "",
+    title: "1.8.0 — the gemcrafter",
+    lines: [
+      "Gemcrafting has its own bench, moved off the blacksmith's page. Sockets are still cut at the blacksmith; the stones that go in them are cut here.",
+      "Rough gems now drop from realms and raids in three colours \u2014 RED for Strength, GREEN for Agility, YELLOW for Intellect. Ordinary kills give a trickle; raid bosses give a handful. Nothing arrives already cut.",
+      "Cut one colour on its own and you get that primary's stone. Mix colours and you get a secondary colour with a secondary stat, where the ratio matters as much as the colours: equal red and yellow makes an ORANGE carnelian for critical strike, while two reds to one yellow deepens it to SCARLET garnet for critical damage. Two greens to one yellow makes deep green jade for armour, two yellows to one green a seafoam aquamarine for dodge, and so on \u2014 seventeen stones in all.",
+      "All three colours together make the strangest stones: BLACK obsidian for damage reduction, PALE pearl for Spirit, opalescent opal for damage of every school, and the two blooded and moonlit stones that carry a proc instead of a stat.",
+      "Grade passes through the cut \u2014 Coarse rough gems make Chipped stones, Clear make Cut, Pure make Flawless \u2014 so grade decides how much a stone gives, never which stat it gives.",
+      "Gems you already owned have been carried across to the reorganised stones by the stat you collected them for, in the bag and in every socket, so nothing is lost.",
+    ],
+  },
+  {
+    v: "1.7.0", date: "",
     title: "1.7.0 — the forge grows teeth",
     lines: [
       "TEMPERING. The blacksmith will raise a piece by two item levels and rescale its stats to match, up to five times per item and never past item level 75. Costs climb steeply with each step, so a favourite piece can keep pace instead of being retired. Uniques cannot be tempered \u2014 their stats are written by hand and rescaling them would undo that.",

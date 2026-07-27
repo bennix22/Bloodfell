@@ -234,23 +234,8 @@ function renderSmithWorkshops() {
     ${sCheck.ok ? "" : `<div class="meta" style="color:var(--dim);margin-top:4px">${sCheck.msg}</div>`}
     ${gemButtons ? `<div style="margin-top:10px">
       <div class="meta" style="margin-bottom:4px">Set a gem into the next empty socket</div>
-      <div class="chiprow">${gemButtons}</div></div>` : ""}
-  </div>
-
-  <div class="panel">
-    <h3>Gems held</h3>
-    <p>Stones fall from raid bosses and Wardens. Jewelworking will one day cut them from rough gems;
-       for now, what drops is what you have.</p>
-    ${owned.length ? `<div class="gemgrid">${owned.map(k => {
-      const g = gemById(k);
-      if (!g) return "";
-      const what = g.effect
-        ? `${g.effect.chance}% chance of ${effectName ? effectName(g.effect) : g.stat}`
-        : Object.keys(g.mods).map(x => statLine(x, g.mods[x])).join(", ");
-      return `<div class="gemcard" style="border-left-color:${g.colour}">
-        <div class="gn">${g.name} <span class="gemcount">\u00D7${S.gems[k]}</span></div>
-        <div class="gd">${what}</div></div>`;
-    }).join("")}</div>` : `<div class="empty" style="padding:18px">No gems yet. Raid bosses drop them.</div>`}
+      <div class="chiprow">${gemButtons}</div></div>` : `<div class="meta" style="margin-top:10px;color:var(--dim)">
+      No cut gems in hand. The gemcrafter cuts them from rough stones.</div>`}
   </div>`;
 }
 
@@ -258,6 +243,123 @@ function doTemper(uid) { Sound.play("craft", 0); UI.say(temperItem(uid)); }
 function doAddSocket(uid) { Sound.play("craft", 0); UI.say(addSocket(uid)); }
 function doSetGem(uid, i, key) { Sound.play("craft", 0); UI.say(setGem(uid, i, key)); }
 function doClearSocket(uid, i) { UI.say(clearSocket(uid, i)); }
+
+
+/* ----------------------------------------------------------- gemcrafting */
+/* The bench. Rough gems on the left as a colour swatch, the recipes below,
+   grouped by how many colours go into them so the mixing rules are legible at a
+   glance rather than something you have to memorise. */
+UI.gemGrade = UI.gemGrade || "chipped";
+
+function setGemGrade(g) { UI.gemGrade = g; UI.render(); }
+
+function roughSwatch(colour, grade) {
+  const c = ROUGH_COLOURS[colour];
+  const n = S.roughGems[roughKey(colour, grade)] || 0;
+  return `<div class="roughcell ${n ? "" : "none"}">
+    <i class="roughdot" style="background:${c.colour}"></i>
+    <span class="rn2">${c.name}</span>
+    <span class="gemcount">\u00D7${n}</span>
+  </div>`;
+}
+
+function mixChips(mix) {
+  return Object.keys(mix).map(colour => {
+    const c = ROUGH_COLOURS[colour];
+    return `<span class="mixchip"><i class="roughdot" style="background:${c.colour}"></i>${mix[colour]}</span>`;
+  }).join(`<span class="mixplus">+</span>`);
+}
+
+function renderGemcrafting() {
+  const grade = GEM_GRADES[UI.gemGrade] ? UI.gemGrade : "chipped";
+  const g = GEM_GRADES[grade];
+
+  const gradeTabs = Object.keys(GEM_GRADES).map(k => {
+    const gg = GEM_GRADES[k];
+    const held = Object.keys(ROUGH_COLOURS).reduce((a, c) => a + (S.roughGems[roughKey(c, k)] || 0), 0);
+    return `<button class="btn sm ${k === grade ? "primary" : ""}" onclick="setGemGrade('${k}')">
+      ${gg.name}${held ? ` <span class="gemcount">${held}</span>` : ""}</button>`;
+  }).join("");
+
+  const swatches = Object.keys(ROUGH_COLOURS).map(c => roughSwatch(c, grade)).join("");
+
+  const groups = [
+    { label: "One colour \u2014 the primary stats", n: 1 },
+    { label: "Two colours \u2014 the secondary stats", n: 2 },
+    { label: "All three \u2014 the black, the pale and the rare", n: 3 },
+  ];
+
+  const benches = groups.map(grp => {
+    const rows = GEM_TYPES.filter(t => Object.keys(t.mix).length === grp.n).map(t => {
+      const key = gemKey(t.id, grade);
+      const gem = gemById(key);
+      const cost = cutCost(t.id, grade);
+      const check = canCutGem(t.id, grade);
+      const have = S.gems[key] || 0;
+      const what = gem.effect
+        ? `${gem.effect.chance}% chance of ${effectName(gem.effect)}`
+        : Object.keys(gem.mods).map(k => statLine(k, gem.mods[k])).join(", ");
+
+      return `<div class="reciperow">
+        <div class="rn">
+          <i class="roughdot big" style="background:${t.colour}"></i>
+          ${gem.name}
+          <span class="gemcount">\u00D7${have}</span>
+          <span class="shade">${t.shade}</span>
+          <div class="cost" style="margin-top:2px">${what}</div>
+          <div class="socketrow" style="margin-top:5px">
+            ${mixChips(t.mix)}
+            <span class="mixeq">\u2192</span>
+            <span class="mixgold">${fmt(cost.gold)}g</span>
+          </div>
+        </div>
+        <button class="btn sm ${check.ok ? "primary" : ""}" ${check.ok ? "" : "disabled"}
+          onclick="doCutGem('${t.id}','${grade}',1)">Cut</button>
+        <button class="btn sm" ${check.ok ? "" : "disabled"}
+          onclick="doCutGem('${t.id}','${grade}',5)">\u00D75</button>
+      </div>`;
+    }).join("");
+    return `<div class="panel"><h3>${grp.label}</h3>${rows}</div>`;
+  }).join("");
+
+  // everything already cut
+  const owned = Object.keys(S.gems || {}).filter(k => S.gems[k] > 0);
+  const held = owned.length
+    ? `<div class="gemgrid">${owned.map(k => {
+        const gem = gemById(k);
+        if (!gem) return "";
+        const what = gem.effect
+          ? `${gem.effect.chance}% chance of ${effectName(gem.effect)}`
+          : Object.keys(gem.mods).map(x => statLine(x, gem.mods[x])).join(", ");
+        return `<div class="gemcard" style="border-left-color:${gem.colour}">
+          <div class="gn">${gem.name} <span class="gemcount">\u00D7${S.gems[k]}</span></div>
+          <div class="gd">${what}</div></div>`;
+      }).join("")}</div>`
+    : `<div class="empty" style="padding:18px">Nothing cut yet.</div>`;
+
+  return `<div class="phead">
+      <h2>Gemcrafting</h2>
+      <p>Rough gems fall in three colours \u2014 red for Strength, green for Agility, yellow for
+         Intellect. Cut one colour on its own and you get that primary's stone. Mix them and you get
+         a secondary colour with a secondary stat, where the ratio matters as much as the colours:
+         equal red and yellow makes an orange stone for critical strike, while two reds to one yellow
+         deepens it to scarlet for critical damage. Sockets to put them in are cut at the blacksmith.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Rough gems</h3>
+      <p>Grade passes through the cut: ${g.rough} stones make ${g.name} gems. Ordinary kills give a
+         trickle, raid bosses a handful.</p>
+      <div class="tabs">${gradeTabs}</div>
+      <div class="roughrow">${swatches}</div>
+    </div>
+
+    ${benches}
+
+    <div class="panel"><h3>Cut gems held</h3>${held}</div>`;
+}
+
+function doCutGem(id, grade, n) { Sound.play("craft", 0); UI.say(cutGem(id, grade, n)); }
 
 /* --------------------------------------------------------------- alchemy */
 function renderAlchemy() {

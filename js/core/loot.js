@@ -320,6 +320,11 @@ function rollRealmLoot(realm, enemyLevel, lootMod, magicFind) {
   const out = { materials: {}, items: [], gold: 0 };
   const mod = lootMod || 1;
 
+  // an uncut stone now and then, so the gemcrafter's bench fills while you grind
+  if (typeof rollRoughGem === "function" && Math.random() < ROUGH_DROP_CHANCE_REALM * mod) {
+    out.rough = [rollRoughGem(enemyLevel)];
+  }
+
   // materials — most kills give something
   const matRolls = [
     { id: t.metal, chance: 0.42, qty: [1, 3] },
@@ -364,10 +369,11 @@ function rollBossLoot(boss, magicFind) {
   const setDef = setPieceForBoss(boss.id);
   const setOdds = Math.min(SET_DROP_CHANCE * setPoolSizeForBoss(boss.id), 0.45);
   if (setDef && Math.random() < setOdds * mf) out.items.push(makeSetPiece(setDef));
-  // a stone for the socket, sometimes
-  if (typeof rollGem === "function" && Math.random() < GEM_DROP_CHANCE * mf) {
-    out.gems = out.gems || [];
-    out.gems.push(rollGem(boss.lvl));
+  // uncut stones \u2014 reliably from a boss, since one cut can want six of them
+  if (typeof rollRoughGem === "function" && Math.random() < ROUGH_DROP_CHANCE_BOSS * mf) {
+    out.rough = out.rough || [];
+    out.rough.push(rollRoughGem(boss.lvl));
+    if (Math.random() < 0.45) out.rough.push(rollRoughGem(boss.lvl));
   }
   // bosses also always cough up a piece of ordinary gear
   out.items.push(generateItem({
