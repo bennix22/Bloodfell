@@ -137,22 +137,41 @@ function doForge() {
 
 
 /* ------------------------------------------------- tempering & socketing */
-/* Both workshops act on one chosen item, so they share a picker. Uniques are
-   left out of it: they cannot be tempered or socketed. */
+/* Both workshops act on one chosen item, so they share a picker. Only EQUIPPED
+   gear is offered: tempering and socketing are for the kit you are actually
+   fighting in, and listing a full inventory made the dropdown useless. Uniques
+   are left out of it entirely \u2014 they cannot be tempered or socketed. */
 function smithTargets() {
   const out = [];
   for (const sl of SLOTS) {
     const it = S.equipment[sl.key];
     if (it && !it.uniqueId) out.push({ item: it, worn: true });
   }
-  for (const it of S.inventory) if (!it.uniqueId) out.push({ item: it, worn: false });
   return out;
 }
 
-function smithChosen() {
+/* Each workshop remembers its own selection, so you can temper one piece while
+   socketing another instead of the two fighting over a single dropdown. */
+function smithChosenFor(key) {
   const targets = smithTargets();
-  const want = UI.tab.smithUid;
+  const want = UI.tab[key];
   return targets.find(t => t.item.uid === want) || targets[0] || null;
+}
+function smithChosen() { return smithChosenFor("smithUid"); }
+function socketChosen() { return smithChosenFor("socketUid"); }
+
+/* A picker for one workshop. Shows socket counts too, since which piece has a
+   free socket is exactly what you want to know while choosing. */
+function smithPicker(key, chosen, withSockets) {
+  return `<select onchange="UI.tab.${key}=this.value;UI.render()">
+    ${smithTargets().map(t => {
+      const n = socketsOn(t.item).length;
+      const max = maxSocketsFor(t.item);
+      const sock = withSockets ? ` \u00B7 ${n}/${max} sockets` : "";
+      return `<option value="${t.item.uid}" ${chosen && t.item.uid === chosen.item.uid ? "selected" : ""}>
+        ${t.item.name} \u2014 ilvl ${t.item.ilvl}${sock}</option>`;
+    }).join("")}
+  </select>`;
 }
 
 function socketStrip(item) {
@@ -169,34 +188,34 @@ function socketStrip(item) {
 
 function renderSmithWorkshops() {
   const chosen = smithChosen();
-  const targets = smithTargets();
-
-  const picker = `<select onchange="UI.tab.smithUid=this.value;UI.render()">
-    ${targets.map(t => `<option value="${t.item.uid}" ${chosen && t.item.uid === chosen.item.uid ? "selected" : ""}>
-      ${t.item.name}${t.worn ? " (worn)" : ""} \u2014 ilvl ${t.item.ilvl}</option>`).join("")}
-  </select>`;
+  const sChosen = socketChosen();
 
   if (!chosen) {
     return `<div class="panel"><h3>Tempering and socketing</h3>
-      <div class="empty" style="padding:20px">Nothing to work on. Uniques cannot be tempered or socketed.</div></div>`;
+      <div class="empty" style="padding:20px">Equip something first \u2014 the smith works on the gear
+        you are wearing. Uniques cannot be tempered or socketed.</div></div>`;
   }
 
+  // tempering works on its own chosen piece...
   const item = chosen.item;
   const steps = temperSteps(item);
   const tCost = temperCost(item);
   const tCheck = canTemper(item.uid);
-  const sCost = socketCost(item);
-  const sCheck = canAddSocket(item.uid);
-  const maxSock = maxSocketsFor(item);
 
-  // gems owned, for filling a socket
+  // ...and socketing on its own
+  const sItem = sChosen.item;
+  const sCost = socketCost(sItem);
+  const sCheck = canAddSocket(sItem.uid);
+  const maxSock = maxSocketsFor(sItem);
+
+  // gems owned, for filling a socket on the socketing panel's piece
   const owned = Object.keys(S.gems || {}).filter(k => S.gems[k] > 0);
-  const emptyIdx = socketsOn(item).indexOf(null);
+  const emptyIdx = socketsOn(sItem).indexOf(null);
   const gemButtons = owned.length && emptyIdx >= 0
     ? owned.map(k => {
         const g = gemById(k);
         if (!g) return "";
-        return `<button class="btn sm" onclick="doSetGem('${item.uid}',${emptyIdx},'${k}')">
+        return `<button class="btn sm" onclick="doSetGem('${sItem.uid}',${emptyIdx},'${k}')">
           ${g.name} <span class="gemcount">\u00D7${S.gems[k]}</span></button>`;
       }).join("")
     : "";
@@ -204,8 +223,9 @@ function renderSmithWorkshops() {
   return `<div class="panel">
     <h3>Tempering</h3>
     <p>Raise a piece by ${TEMPER_STEP} item levels and rescale its stats to match. Up to
-       ${TEMPER_MAX_STEPS} times per item, never past item level ${TEMPER_ILVL_CAP}. Uniques cannot be tempered.</p>
-    <div class="invhead">${picker}</div>
+       ${TEMPER_MAX_STEPS} times per item, never past item level ${TEMPER_ILVL_CAP}. Works on equipped
+       gear; Uniques cannot be tempered.</p>
+    <div class="invhead">${smithPicker("smithUid", chosen, false)}</div>
     <div class="reciperow">
       <div class="rn"><span class="r-${item.rarity}">${item.name}</span>
         <div class="cost" style="margin-top:2px">
@@ -220,16 +240,17 @@ function renderSmithWorkshops() {
 
   <div class="panel">
     <h3>Socketing</h3>
-    <p>Cut a socket and set a gem in it. ${RARITIES[item.rarity].name} items hold up to ${maxSock}.
+    <p>Cut a socket and set a gem in it. ${RARITIES[sItem.rarity].name} items hold up to ${maxSock}.
        Prising a gem out breaks it, so choose deliberately.</p>
+    <div class="invhead">${smithPicker("socketUid", sChosen, true)}</div>
     <div class="reciperow">
-      <div class="rn"><span class="r-${item.rarity}">${item.name}</span>
+      <div class="rn"><span class="r-${sItem.rarity}">${sItem.name}</span>
         <div class="cost" style="margin-top:2px">
-          ${socketsOn(item).length} of ${maxSock} sockets \u00B7 ${costText(sCost.mats, sCost.gold)}</div>
-        <div class="socketrow">${socketStrip(item)}</div>
+          ${socketsOn(sItem).length} of ${maxSock} sockets \u00B7 ${costText(sCost.mats, sCost.gold)}</div>
+        <div class="socketrow">${socketStrip(sItem)}</div>
       </div>
       <button class="btn sm ${sCheck.ok ? "primary" : ""}" ${sCheck.ok ? "" : "disabled"}
-        onclick="doAddSocket('${item.uid}')">Cut socket</button>
+        onclick="doAddSocket('${sItem.uid}')">Cut socket</button>
     </div>
     ${sCheck.ok ? "" : `<div class="meta" style="color:var(--dim);margin-top:4px">${sCheck.msg}</div>`}
     ${gemButtons ? `<div style="margin-top:10px">

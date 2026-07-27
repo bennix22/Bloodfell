@@ -9,11 +9,25 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.8.1";
+const VERSION = "1.8.3";
 
 const CHANGELOG = [
   {
-    v: "1.8.1", date: "current",
+    v: "1.8.3", date: "current",
+    title: "1.8.3 — pick what you socket",
+    lines: [
+      "Socketing has its own item picker now. It was quietly borrowing the tempering one, which meant it always landed on whatever came first \u2014 usually the helm \u2014 with no way to change it. You can now temper one piece and socket another, and the socketing list shows each piece's socket count so you can see at a glance which has room.",
+    ],
+  },
+  {
+    v: "1.8.2", date: "",
+    title: "1.8.2 — the smith works on what you wear",
+    lines: [
+      "The blacksmith's item picker now lists only equipped gear. Tempering and socketing are for the kit you are actually fighting in, and a full inventory made that dropdown unusable.",
+    ],
+  },
+  {
+    v: "1.8.1", date: "",
     title: "1.8.1 — cutting costs more",
     lines: [
       "Cutting a gem costs 75% more gold at every grade. Cutting stones is meant to be the thing gold is FOR, and it was too cheap to matter: a Chipped cut is now 700 gold, a Cut 4,550, and a Flawless 24,500. The two proc stones still cost two and a half times that.",
