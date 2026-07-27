@@ -9,11 +9,34 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.2.0";
+const VERSION = "1.4.0";
 
 const CHANGELOG = [
   {
-    v: "1.2.0", date: "current",
+    v: "1.4.0", date: "current",
+    title: "1.4.0 — the bank, and a set for every build",
+    lines: [
+      "There is a bank now, on its own page under Character. Store anything from your inventory and it is out of play until you withdraw it \u2014 auto-salvage, bulk selling and bulk salvaging never reach inside.",
+      "Twelve armour sets, three built around each of Strength, Agility, Intellect and Spirit, so every build has an early, a middle and a late set aimed at it. Each raid hosts two or three of them, and the one that drops follows how you actually fight.",
+      "Mage spells now scale with Intellect plus half your Spirit \u2014 the mirror of the change priests got \u2014 so the Spirit that piles up on caster gear is no longer wasted on them. Intellect still counts in full, so no mage gets weaker.",
+    ],
+  },
+  {
+    v: "1.3.0", date: "",
+    title: "1.3.0 — sets, uniques, and a kinder early game",
+    lines: [
+      "Set pieces from older saves now show their proper Set rarity and emerald colour instead of appearing Legendary.",
+      "Talents unlock at level 1 and you earn a point every level, so a caster's first spell arrives around level 6 instead of 15.",
+      "Priest spells now scale with Spirit plus half your Intellect. Spirit still counts in full, so no priest gets weaker \u2014 but Intellect gear finally helps them.",
+      "Every raid boss now guards a Unique (11 new ones). Unique stats have been cut 15% across the board \u2014 they were doing too much \u2014 and the Strength / Agility / Intellect line-ups are now even, nine apiece.",
+      "You can equip at most two Uniques at once. Stacking three or four was where the immortal, 200k-crit spirals came from.",
+      "Two new armour sets for the deepest raids \u2014 the Weeping Raiment and the Vestments of the Last Dark. As with every set, the raw stats follow your build, so they suit any character.",
+      "Boss cards now show the Unique that boss drops.",
+      "The character page no longer repeats the Health and Mana bars (they live in the sidebar). That space now lists the aspect etched on each equipped item.",
+    ],
+  },
+  {
+    v: "1.2.0", date: "",
     title: "1.2.0 — a face of its own",
     lines: [
       "Bloodfell has a proper logo now, up in the corner where the plain title used to be.",

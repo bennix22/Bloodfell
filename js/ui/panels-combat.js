@@ -303,14 +303,23 @@ function renderRaids() {
            <span style="color:var(--dim);font-family:var(--mono);font-size:10px"> ${(d.chance * 100).toFixed(1)}%</span>
          </div>`).join("");
 
+      const bossUniques = (typeof uniquesForBoss === "function" ? uniquesForBoss(boss.id) : [])
+        .map(u => `<div style="font-size:11.5px;padding:1px 0">
+           <span class="r-unique">${u.name}</span>
+           <span style="color:var(--dim);font-family:var(--mono);font-size:10px"> ${(u.chance * 100).toFixed(1)}%</span>
+         </div>`).join("");
+
       return `<div class="card ${avail ? "" : "locked"} ${active ? "active" : ""}">
         <div class="meta">Boss ${i + 1} \u00B7 level ${boss.lvl}${kills ? ` \u00B7 slain ${kills}\u00D7` : ""}</div>
         <h4>${boss.name}${boss.title ? `<span style="color:var(--ash);font-size:13px">, ${boss.title}</span>` : ""}</h4>
         <div class="desc">${boss.blurb}</div>
         ${kills ? `<div class="meta" style="color:var(--brass)">+${escHp}% health, +${escDmg}% damage from ${kills} repeat kills</div>` : ""}
         ${unlocks.length ? `<div class="meta">opens ${unlocks.join(", ")}</div>` : ""}
+        ${bossUniques ? `<div style="border-top:1px solid var(--edge);padding-top:7px;margin-top:2px">
+          <div class="meta" style="margin-bottom:3px;color:var(--r-unique)">Unique drop</div>${bossUniques}
+        </div>` : ""}
         <div style="border-top:1px solid var(--edge);padding-top:7px;margin-top:2px">
-          <div class="meta" style="margin-bottom:3px">Unique drops</div>${drops}
+          <div class="meta" style="margin-bottom:3px">Notable drops</div>${drops}
         </div>
         <div class="foot">
           ${avail

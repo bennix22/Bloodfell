@@ -77,6 +77,9 @@ const Tooltip = {
     if (kind === "inv") {
       item = S.inventory.find(i => i.uid === key);
       if (item) compare = bestWornFor(item);
+    } else if (kind === "bank") {
+      item = (S.bank || []).find(i => i.uid === key);
+      if (item) compare = bestWornFor(item);
     } else if (kind === "eq") {
       item = S.equipment[key];
     } else if (kind === "shop") {

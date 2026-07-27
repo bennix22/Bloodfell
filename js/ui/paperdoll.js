@@ -95,7 +95,6 @@ function doll(slotKey) {
    the weapons across the bottom. */
 function paperdollHtml() {
   const st = computeStats();
-  const v = currentVitals();
 
   const left = ["helm", "shoulders", "cape", "chest", "wrist", "gloves"];
   const right = ["waist", "legs", "boots", "ring1", "ring2", "trinket1", "trinket2"];
@@ -106,17 +105,26 @@ function paperdollHtml() {
     ? Math.round(SLOTS.reduce((a, s) => a + (S.equipment[s.key] ? S.equipment[s.key].ilvl : 0), 0) / worn)
     : 0;
 
+  // Health and Mana already live in the rail, so instead of repeating them here
+  // (and fighting to keep two bars aligned) this space lists the aspect etched on
+  // each equipped item — the one piece of gear information the paperdoll couldn't
+  // otherwise show at a glance.
+  const aspected = SLOTS.map(s => S.equipment[s.key]).filter(it => it && it.aspect);
+  const aspectsHtml = aspected.length
+    ? aspected.map(it => `<div class="dollaspect">
+        <span class="an r-${it.rarity}">${it.name}</span>
+        <span class="av">${it.aspect.name}</span></div>`).join("")
+    : `<div class="dollaspect-empty">No aspects etched. Draw one from a salvaged item and etch it at the Enchanter.</div>`;
+
   return `<div class="paperdoll-wrap">
     <div class="dollcol">${left.map(doll).join("")}</div>
 
     <div class="dollcentre">
       <div class="dollname">${S.name === "Nameless" ? "Unnamed" : S.name}</div>
       <div class="dolllvl">Level ${S.level}</div>
-      <div class="dollbars">
-        <div class="barlabel"><span>Health</span><span>${fmt(v.hp)} / ${fmt(v.maxHp)}</span></div>
-        <div class="bar hp"><i style="width:${clamp(v.hp / v.maxHp * 100, 0, 100)}%"></i></div>
-        <div class="barlabel"><span>Mana</span><span>${fmt(v.mana)} / ${fmt(v.maxMana)}</span></div>
-        <div class="bar mana"><i style="width:${clamp(v.mana / v.maxMana * 100, 0, 100)}%"></i></div>
+      <div class="dollaspects">
+        <div class="dollaspects-head">Aspects</div>
+        ${aspectsHtml}
       </div>
       <div class="dollsummary">
         <div><span>Damage</span><b>${fmt(st.swingMin)}\u2013${fmt(st.swingMax)}</b></div>

@@ -487,6 +487,18 @@ button { font-family: inherit; }
   color: var(--brass); text-transform: uppercase; margin-top: 3px;
 }
 .dollbars { margin: 16px 0; text-align: left; }
+.dollaspects { margin: 16px 0; text-align: left; }
+.dollaspects-head {
+  font-family: var(--mono); font-size: calc(9.5px * var(--fs)); letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--brass); margin-bottom: 7px;
+}
+.dollaspect {
+  display: flex; justify-content: space-between; gap: 10px; align-items: baseline;
+  padding: 3px 0; font-size: calc(12px * var(--fs)); border-bottom: 1px solid var(--edge);
+}
+.dollaspect .an { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dollaspect .av { font-family: var(--serif); color: var(--witch); flex-shrink: 0; }
+.dollaspect-empty { font-size: calc(11.5px * var(--fs)); color: var(--dim); line-height: 1.5; }
 .dollsummary {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   gap: 3px 14px; text-align: left;

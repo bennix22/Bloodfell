@@ -10,22 +10,27 @@
 
 const SAVE_KEY = "opus_realms_save_v1";
 const MAX_LEVEL = 75;
-const TALENT_START_LEVEL = 10;
+// Talents unlock immediately and a point is earned every level, so the first
+// spell (5 points in a tree) lands around level 6 instead of 15 — the old start
+// of 10 left casters with nothing to press for far too long.
+const TALENT_START_LEVEL = 1;
 
 /* ---------------------------------------------------------------------------
    LEVELLING PACE — the single dial for how long the game is.
 
-   XP_PACE multiplies the whole curve. Roughly how long reaching level 50 takes
-   with auto-grind running, measured including the gap between fights:
+   XP_PACE multiplies the whole curve. The cap is level 75 and auto-grind speed
+   tops out at 3x, so rough time to reach 75 with auto-grind running (including
+   the gap between fights):
 
-       XP_PACE      1x speed     2x        4x        8x
-         1.0           10h        6h        3h        2h
-         1.5           15h        9h        5h        3h
-         2.5           25h       14h        9h        6h     <- default
-         4.0           40h       23h       14h        9h
+       XP_PACE      1x speed     2x        3x
+         1.0           ~14h      ~8h       ~6h
+         1.5           ~21h     ~12h       ~9h
+         2.5           ~34h     ~20h      ~15h     <- default
+         4.0           ~55h     ~32h      ~24h
 
    The exponent controls the shape rather than the length: raise it and the last
-   ten levels become the bulk of the game, lower it and the climb is more even.
+   handful of levels become the bulk of the game, lower it and the climb is more
+   even.
    --------------------------------------------------------------------------- */
 const XP_PACE = 2.5;
 const XP_EXPONENT = 1.85;
@@ -51,6 +56,10 @@ function freshSave() {
 
     equipment: eq,
     inventory: [],
+    /* The bank: items set aside on purpose. Nothing here is ever touched by
+       auto-salvage, and it is not searched when equipping or selling, so it is
+       safe long-term storage rather than a second bag. */
+    bank: [],
     materials: {},
     potions: {},
 
@@ -193,6 +202,16 @@ function sanitizeTalents(save) {
   }
 }
 
+/* Set pieces generated before 1.1.0 were stamped Legendary; give them the Set
+   rarity so they show in their own colour. Stats are identical (same budget), so
+   this only changes how they read. */
+function retagSetPieces(save) {
+  const fix = it => { if (it && it.setId) it.rarity = "set"; };
+  if (save.inventory) save.inventory.forEach(fix);
+  if (save.equipment) for (const k in save.equipment) fix(save.equipment[k]);
+  if (save.merchant && save.merchant.stock) save.merchant.stock.forEach(fix);
+}
+
 function migrate(save) {
   const base = freshSave();
   const out = Object.assign(base, save);
@@ -207,6 +226,8 @@ function migrate(save) {
   if (!out.run) out.run = { realmId: null, depth: 0 };
   if (!out.vitals) out.vitals = { hp: null, mana: null };
   sanitizeTalents(out);
+  retagSetPieces(out);
+  if (!Array.isArray(out.bank)) out.bank = [];   // saves from before the bank existed
   return out;
 }
 

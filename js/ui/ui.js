@@ -62,6 +62,7 @@ const UI = {
     { group: "Character" },
     { id: "character", label: "Character", glyph: "\u25C8" },
     { id: "inventory", label: "Inventory", glyph: "\u2263" },
+    { id: "bank", label: "Bank", glyph: "\u25A4" },
     { id: "talents", label: "Talents", glyph: "\u2733" },
     { id: "skills", label: "Skills", glyph: "\u25C9" },
     { group: "Craft" },
@@ -152,6 +153,7 @@ const UI = {
       descent: renderDescent,
       character: renderCharacter,
       inventory: renderInventory,
+      bank: renderBank,
       talents: renderTalents,
       skills: renderSkills,
       blacksmith: renderBlacksmith,
@@ -368,10 +370,10 @@ function upgradeDelta(item) {
   return itemScore(item) - best;
 }
 
-function itemRow(item, actions) {
+function itemRow(item, actions, tipKind) {
   const delta = upgradeDelta(item);
   const up = delta > 0 ? `<span class="upgrade">\u25B2 +${delta}</span>` : "";
-  return `<div class="itemrow b-${item.rarity}" data-tip="inv:${item.uid}">
+  return `<div class="itemrow b-${item.rarity}" data-tip="${tipKind || "inv"}:${item.uid}">
     <div class="main">
       <div class="nm r-${item.rarity}">${item.name} ${up}</div>
       <div class="sub">${slotLabel(item.slot)} \u00B7 item level ${item.ilvl} \u00B7 ${RARITIES[item.rarity].name}</div>

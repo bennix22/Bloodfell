@@ -269,6 +269,82 @@ const PASSIVES = {
       C.pushLog(`The page reads: ${r.name}.`, "proc");
     },
   },
+
+  /* ---- boss uniques, one per raid boss (added 1.3.0) ---------------------- */
+
+  /* Vorlanth — cheaper casting. */
+  deepvoice: {
+    manaCost(C, cost) { return cost * 0.80; },
+  },
+
+  /* Gravethirst — the first blow of each fight is mostly turned aside. */
+  first_wound: {
+    fightStart(C) { C.passiveState.firstWound = true; },
+    damageTaken(C, dmg) {
+      if (C.passiveState.firstWound) { C.passiveState.firstWound = false; return dmg * 0.40; }
+      return dmg;
+    },
+  },
+
+  /* The Pale Physician — stronger healing, gentler blows. */
+  palliative: {
+    healTaken(C, amt) { return amt * 1.35; },
+    damageDealt(C, dmg) { return dmg * 0.90; },
+  },
+
+  /* Gutterlord Vhask — finishes the wounded. */
+  opportunist: {
+    damageDealt(C, dmg) {
+      return C.enemy && C.enemy.hp < C.enemy.maxHp * 0.35 ? dmg * 1.35 : dmg;
+    },
+  },
+
+  /* The Red Widow — lethal, and fragile. */
+  black_widow: {
+    statMods() { return { crit: 25 }; },
+    damageTaken(C, dmg) { return dmg * 1.12; },
+  },
+
+  /* Carrionmaw — the weapon feeds you. */
+  the_feast: {
+    damageDealt(C, dmg) { C.healPlayer(dmg * 0.10, null, true); return dmg; },
+  },
+
+  /* The Devourer Below — crits bite deeper. */
+  devour: {
+    damageDealt(C, dmg, ctx) { return ctx && ctx.crit ? dmg * 1.30 : dmg; },
+  },
+
+  /* Nihiloth — a caster's bargain: spells hit harder, swings weaker. */
+  voidcall: {
+    damageDealt(C, dmg, ctx) {
+      if (!ctx) return dmg;
+      if (ctx.source === "spell") return dmg * 1.25;
+      if (ctx.source === "auto") return dmg * 0.80;
+      return dmg;
+    },
+  },
+
+  /* The Blind Empress — unseen and untouched. */
+  unseen: {
+    statMods() { return { dodge: 18, crit: 12 }; },
+  },
+
+  /* Warden of Oblivion — a wall while whole, paper once hurt. */
+  oblivion_ward: {
+    damageTaken(C, dmg) {
+      return C.player.hp > C.stats.maxHp * 0.60 ? dmg * 0.65 : dmg;
+    },
+  },
+
+  /* Erebus — the killing edge grows as the enemy fails. */
+  the_last_dark: {
+    damageDealt(C, dmg) {
+      if (!C.enemy || !C.enemy.maxHp) return dmg;
+      const missing = 1 - C.enemy.hp / C.enemy.maxHp;
+      return dmg * (1 + 0.50 * missing);
+    },
+  },
 };
 
 /* ---------------------------------------------------------------------------

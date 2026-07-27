@@ -15,6 +15,10 @@ function slotsForItem(item) {
 
 function isTwoHanded(item) { return !!(item && item.hands === 2); }
 
+// Two Uniques is the ceiling. Their passives multiply together — three or four at
+// once is where the immortal / 200k-crit spirals came from.
+const MAX_EQUIPPED_UNIQUES = 2;
+
 function equipItem(uidStr, preferredSlot) {
   const idx = S.inventory.findIndex(i => i.uid === uidStr);
   if (idx < 0) return { ok: false, msg: "That item is gone." };
@@ -28,6 +32,10 @@ function equipItem(uidStr, preferredSlot) {
       if (worn && worn.uniqueId === item.uniqueId) {
         return { ok: false, msg: `You are already wearing ${item.name}.` };
       }
+    }
+    const wornUniques = SLOTS.filter(s => S.equipment[s.key] && S.equipment[s.key].uniqueId).length;
+    if (wornUniques >= MAX_EQUIPPED_UNIQUES) {
+      return { ok: false, msg: `You can wear at most ${MAX_EQUIPPED_UNIQUES} Uniques at once. Remove one first.` };
     }
   }
 
@@ -55,6 +63,38 @@ function equipItem(uidStr, preferredSlot) {
 
   saveGame();
   return { ok: true, msg: `Equipped ${item.name}.${note}` };
+}
+
+/* ---------------------------------------------------------------------------
+   THE BANK — deliberate storage.
+   Items here are out of play: auto-salvage never sees them, they are not
+   candidates for equipping or selling, and nothing else in the game touches
+   them. Unlimited, because the point is peace of mind, not another puzzle.
+   --------------------------------------------------------------------------- */
+function bankItem(uidStr) {
+  const idx = S.inventory.findIndex(i => i.uid === uidStr);
+  if (idx < 0) return { ok: false, msg: "That item is gone." };
+  const item = S.inventory.splice(idx, 1)[0];
+  S.bank.push(item);
+  saveGame();
+  return { ok: true, msg: `${item.name} stored in the bank.` };
+}
+
+function withdrawItem(uidStr) {
+  const idx = S.bank.findIndex(i => i.uid === uidStr);
+  if (idx < 0) return { ok: false, msg: "That item is gone." };
+  const item = S.bank.splice(idx, 1)[0];
+  S.inventory.push(item);
+  saveGame();
+  return { ok: true, msg: `${item.name} taken from the bank.` };
+}
+
+/* Stores everything a filter has narrowed the inventory down to, so tidying up
+   is one click rather than fifty. */
+function bankAll(uids) {
+  let n = 0;
+  for (const uid of uids) if (bankItem(uid).ok) n++;
+  return { ok: n > 0, msg: n ? `Stored ${n} item${n > 1 ? "s" : ""}.` : "Nothing to store." };
 }
 
 function unequipItem(slotKey) {

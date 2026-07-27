@@ -157,6 +157,7 @@ function renderInventory() {
       ? targets.map((t, i) => `<button class="btn sm" onclick="doEquip('${item.uid}','${t}')">Wear ${i + 1}</button>`).join("")
       : `<button class="btn sm" onclick="doEquip('${item.uid}')">Wear</button>`;
     return itemRow(item, `${equipBtns}
+      <button class="btn sm" onclick="doBank('${item.uid}')">Store</button>
       <button class="btn sm" onclick="doSell('${item.uid}')">Sell ${fmt(item.value)}g</button>
       <button class="btn sm" onclick="doSalvage('${item.uid}')">Salvage</button>`);
   }).join("");
@@ -255,3 +256,57 @@ function doSalvage(uid) { Sound.play("salvage", 0); UI.say(salvageItem(uid)); }
 function doSalvagePotion(id, n) { UI.say(salvagePotion(id, n)); }
 function bulkSell(rar) { UI.say(sellAllOfRarity(rar)); }
 function bulkSalvage(rar) { UI.say(salvageAllOfRarity(rar)); }
+
+/* ---------------------------------------------------------------------------
+   THE BANK — a page for items you have decided to keep.
+   Nothing here is reachable by auto-salvage, bulk sell, or bulk salvage, which
+   is the whole point: it is the one place a piece is safe while you decide what
+   to do with it.
+   --------------------------------------------------------------------------- */
+UI.bankFilter = { slot: "", rarity: "" };
+
+function setBankFilter(k, v) { UI.bankFilter[k] = v; UI.render(); }
+
+function renderBank() {
+  const f = UI.bankFilter;
+  let items = (S.bank || []).slice();
+  if (f.slot) items = items.filter(i => i.slot === f.slot);
+  if (f.rarity) items = items.filter(i => i.rarity === f.rarity);
+  items.sort((a, b) => itemScore(b) - itemScore(a));
+
+  const slotOpts = SLOT_TYPES.map(s =>
+    `<option value="${s}" ${f.slot === s ? "selected" : ""}>${slotLabel(s)}</option>`).join("");
+  const rarOpts = Object.keys(RARITIES).map(r =>
+    `<option value="${r}" ${f.rarity === r ? "selected" : ""}>${RARITIES[r].name}</option>`).join("");
+
+  const rows = items.map(item => itemRow(item, `
+    <button class="btn sm" onclick="doWithdraw('${item.uid}')">Withdraw</button>`, "bank")).join("");
+
+  const total = (S.bank || []).length;
+
+  return `<div class="phead">
+      <h2>Bank</h2>
+      <p>Storage for what you mean to keep. Auto-salvage and bulk selling never
+         reach in here.</p>
+    </div>
+
+    <div class="panel">
+      <h3>Stored</h3>
+      <p>${total ? `${fmt(total)} item${total > 1 ? "s" : ""} put by.` : "Empty."}
+         Store anything from your inventory with its <b>Store</b> button, and
+         withdraw it here when you want it back.</p>
+      ${total ? `<div class="invhead">
+        <select onchange="setBankFilter('slot', this.value)">
+          <option value="">Every slot</option>${slotOpts}
+        </select>
+        <select onchange="setBankFilter('rarity', this.value)">
+          <option value="">Every rarity</option>${rarOpts}
+        </select>
+      </div>` : ""}
+      ${rows || `<div class="empty" style="padding:22px">
+        ${total ? "Nothing matches those filters." : "The vault is empty."}</div>`}
+    </div>`;
+}
+
+function doBank(uid) { UI.say(bankItem(uid)); }
+function doWithdraw(uid) { UI.say(withdrawItem(uid)); }

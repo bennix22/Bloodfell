@@ -759,6 +759,14 @@ const Combat = {
       // normalised, so weapon speed does not silently scale every spell
       return rand(st.normMin, st.normMax) * sp.coef;
     }
+    // Priest spells scale with Spirit plus half of Intellect. Spirit isn't a gear
+    // primary, so spirit-only scaling left priests unable to grow; folding in half
+    // their Intellect (which they can stack) fixes that without nerfing anyone,
+    // since Spirit still contributes in full.
+    if (sp.scale === "spi_int") return (st.spi + st.int * 0.5) * sp.coef;
+    // Mage spells are the mirror: Intellect in full plus half of Spirit, so the
+    // Spirit that accumulates on caster gear is no longer wasted on them.
+    if (sp.scale === "int_spi") return (st.int + st.spi * 0.5) * sp.coef;
     if (!sp.scale) return 0;
     return st[sp.scale] * sp.coef;
   },

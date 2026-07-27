@@ -92,31 +92,31 @@ const SPELLS = [
 
   /* --------------------------------------------------------------------- MAGE */
   { id: "sp_m1", tree: "mage", req: 5, name: "Rimeshard", type: "damage", school: "magic",
-    scale: "int", coef: 1.21, cd: 5, manaPct: 4.5,
+    scale: "int_spi", coef: 1.21, cd: 5, manaPct: 4.5,
     desc: "A splinter of black ice. Frost damage scaling with Intellect." },
 
   { id: "sp_m2", tree: "mage", req: 10, name: "Emberlance", type: "damage", school: "magic",
-    scale: "int", coef: 1.87, cd: 9, manaPct: 6.5,
+    scale: "int_spi", coef: 1.87, cd: 9, manaPct: 6.5,
     desc: "A spear of fire through the middle. Heavy Intellect scaling." },
 
   { id: "sp_m3", tree: "mage", req: 15, name: "Arcane Cascade", type: "damage", school: "magic",
-    scale: "int", coef: 0.94, cd: 4, manaPct: 5,
+    scale: "int_spi", coef: 0.94, cd: 4, manaPct: 5,
     desc: "Small, fast, relentless. Low cooldown Intellect damage." },
 
   { id: "sp_m4", tree: "mage", req: 20, name: "Cinderbrand", type: "dot", school: "magic",
-    scale: "int", coef: 2.48, cd: 15, manaPct: 8.5, duration: 12, ticks: 6,
+    scale: "int_spi", coef: 2.48, cd: 15, manaPct: 8.5, duration: 12, ticks: 6,
     desc: "Sets a mark that keeps burning. Fire damage over 12 seconds." },
 
   { id: "sp_m5", tree: "mage", req: 25, name: "Cataclysm", type: "damage", school: "magic",
-    scale: "int", coef: 4.4, cd: 30, manaPct: 14,
+    scale: "int_spi", coef: 4.4, cd: 30, manaPct: 14,
     desc: "One very large problem for the target. Enormous Intellect scaling." },
 
   { id: "sp_m6", tree: "mage", req: 30, name: "Meteor", type: "damage", school: "magic",
-    scale: "int", coef: 5.6, cd: 20, manaPct: 11,
+    scale: "int_spi", coef: 5.6, cd: 20, manaPct: 11,
     desc: "A falling rock the size of a house. Massive Intellect scaling." },
 
   { id: "sp_m7", tree: "mage", req: 35, name: "Supernova", type: "damage", school: "magic",
-    scale: "int", coef: 8.2, cd: 34, manaPct: 15,
+    scale: "int_spi", coef: 8.2, cd: 34, manaPct: 15,
     desc: "A star, ended, at the target's feet. Colossal Intellect scaling." },
 
   /* -------------------------------------------------------------------- ROGUE */
@@ -150,27 +150,27 @@ const SPELLS = [
 
   /* ------------------------------------------------------------------- PRIEST */
   { id: "sp_s1", tree: "priest", req: 5, name: "Censure", type: "damage", school: "magic",
-    scale: "spi", coef: 1.26, cd: 6, manaPct: 4,
+    scale: "spi_int", coef: 1.26, cd: 6, manaPct: 4,
     desc: "Shadow damage scaling with Spirit." },
 
   { id: "sp_s2", tree: "priest", req: 10, name: "Mending Word", type: "hot",
-    scale: "spi", coef: 5.0, cd: 12, manaPct: 6.5, duration: 12, ticks: 6,
+    scale: "spi_int", coef: 5.0, cd: 12, manaPct: 6.5, duration: 12, ticks: 6,
     desc: "Healing over 12 seconds, scaling with Spirit." },
 
   { id: "sp_s3", tree: "priest", req: 15, name: "Sanctuary Ward", type: "shield",
-    scale: "spi", coef: 4.8, cd: 20, manaPct: 8.5, duration: 14,
+    scale: "spi_int", coef: 4.8, cd: 20, manaPct: 8.5, duration: 14,
     desc: "Absorbs damage for up to 14 seconds. Scales with Spirit." },
 
   { id: "sp_s4", tree: "priest", req: 20, name: "Whisper of Agony", type: "dot", school: "magic",
-    scale: "spi", coef: 2.86, cd: 16, manaPct: 9, duration: 12, ticks: 6,
+    scale: "spi_int", coef: 2.86, cd: 16, manaPct: 9, duration: 12, ticks: 6,
     desc: "A single suggestion, repeated. Shadow damage over 12 seconds." },
 
   { id: "sp_s5", tree: "priest", req: 25, name: "Choir of the Fallen", type: "heal",
-    scale: "spi", coef: 9.0, cd: 50, manaPct: 13, buff: { mods: { magicDmg: 25, dr: 10 }, duration: 15 },
+    scale: "spi_int", coef: 9.0, cd: 50, manaPct: 13, buff: { mods: { magicDmg: 25, dr: 10 }, duration: 15 },
     desc: "A large heal, plus +25% magic damage and 10% damage reduction for 15 seconds." },
 
   { id: "sp_s6", tree: "priest", req: 30, name: "Shadow Word: Ruin", type: "dot", school: "magic",
-    scale: "spi", coef: 4.4, cd: 16, manaPct: 9, duration: 12, ticks: 6,
+    scale: "spi_int", coef: 4.4, cd: 16, manaPct: 9, duration: 12, ticks: 6,
     desc: "A word that unmakes. Shadow damage over 12 seconds, scaling with Spirit." },
 
   { id: "sp_s7", tree: "priest", req: 35, name: "Apotheosis", type: "buff",
