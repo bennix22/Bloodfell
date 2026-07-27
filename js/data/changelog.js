@@ -9,11 +9,40 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.4.0";
+const VERSION = "1.7.0";
 
 const CHANGELOG = [
   {
-    v: "1.4.0", date: "current",
+    v: "1.7.0", date: "current",
+    title: "1.7.0 — the forge grows teeth",
+    lines: [
+      "TEMPERING. The blacksmith will raise a piece by two item levels and rescale its stats to match, up to five times per item and never past item level 75. Costs climb steeply with each step, so a favourite piece can keep pace instead of being retired. Uniques cannot be tempered \u2014 their stats are written by hand and rescaling them would undo that.",
+      "SOCKETING AND GEMS. Sockets are cut at the blacksmith and hold gems: twelve stones in three grades, from Chipped to Flawless. Most give a stat line, two carry a proc. Gems drop from raid bosses and Wardens. Prising a gem out of a socket breaks it, so choose deliberately. Jewelworking, which will cut stones from rough gems, comes later.",
+      "COMBAT ELIXIRS. Five new elixirs that give more than a draught of the same tier and take something back \u2014 more damage for weaker healing, murderous crits for a glass jaw, and so on. They fire at the opening of a fight like any draught.",
+      "FLASKS. Four flasks that last a whole RUN rather than a fight, through as many fights as you can string together. They are lost when you fall or withdraw, which makes a Descent something to prepare for. One at a time.",
+      "The merchant is gone. Gold now goes into tempering, socketing and the still house instead of a rotating table of gear you mostly did not want.",
+    ],
+  },
+  {
+    v: "1.6.0", date: "",
+    title: "1.6.0 — set tiers levelled out",
+    lines: [
+      "Every set now sits on one of three clean tiers \u2014 item level 25, 45 or 70 \u2014 and every primary stat has one of each. No more lopsided lines where one stat's middle set was thirteen levels ahead of another's.",
+      "Each tier drops from the raid whose difficulty matches it: the Sunken Cathedral hands out the item level 25 sets, the Obsidian Throne the 45s, and the Last Dark the 70s. All four stats are represented in each of those three raids.",
+      "Bonuses on the sets that moved were rescaled to suit their new item level.",
+    ],
+  },
+  {
+    v: "1.5.0", date: "",
+    title: "1.5.0 — sets worth changing your mind over",
+    lines: [
+      "Every primary stat now has an endgame set at item level 70. The Intellect line no longer stops at 58 \u2014 the Sigil of the Last Dark finishes it.",
+      "Set pieces now carry the stat their set is built around instead of quietly matching whatever you are already wearing, and any of a raid's sets can drop regardless of how you have built. Finding four fifths of a Strength set on a caster is now a real temptation to change how you fight, which was the whole idea.",
+      "Because a raid now hands out several sets, the odds of a set piece dropping scale with how many it hosts \u2014 so spreading a raid across four sets does not make each one take four times as long to finish.",
+    ],
+  },
+  {
+    v: "1.4.0", date: "",
     title: "1.4.0 — the bank, and a set for every build",
     lines: [
       "There is a bank now, on its own page under Character. Store anything from your inventory and it is out of play until you withdraw it \u2014 auto-salvage, bulk selling and bulk salvaging never reach inside.",

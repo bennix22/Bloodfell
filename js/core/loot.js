@@ -267,13 +267,26 @@ function dominantPrimary() {
    makes half the endgame sets unwearable through no fault of the player. The set
    bonuses are already written to be school-agnostic; this makes the raw stats
    agree with them. */
+/* A set piece carries the stat its SET is built around, not the stat the wearer
+   happens to favour. That is the point of a set: finding four fifths of a
+   Strength set on an Intellect character should be a real temptation to change
+   how you fight, which it cannot be if the pieces quietly rewrite themselves to
+   whatever you are already wearing.
+   Spirit is not a gear primary, so a Spirit set is Intellect gear with the Spirit
+   rider guaranteed instead of left to a 45% roll. */
+const SET_ITEM_PRIMARY = { str: "str", agi: "agi", int: "int", spi: "int" };
+
 function makeSetPiece(def) {
   const item = generateItem({
     ilvl: def.ilvl,
     rarity: SET_RARITY,
     slot: def.slot,
-    primary: dominantPrimary(),
+    primary: SET_ITEM_PRIMARY[def.primary] || "str",
   });
+  if (def.primary === "spi") {
+    const rider = Math.round(itemBudget(def.ilvl) * RARITIES[SET_RARITY].budget * 0.16);
+    item.stats.spi = Math.max(item.stats.spi || 0, rider);
+  }
   item.name = def.name;
   item.base = def.name;
   item.setId = def.setId;
@@ -347,9 +360,15 @@ function rollBossLoot(boss, magicFind) {
   for (const uq of uniquesForBoss(boss.id)) {
     if (Math.random() < uq.chance * mf) out.items.push(makeUnique2(uq));
   }
-  // each boss in a raid guards one piece of that raid's set, in order
+  // each boss in a raid guards one piece of that raid's sets, in order
   const setDef = setPieceForBoss(boss.id);
-  if (setDef && Math.random() < SET_DROP_CHANCE * mf) out.items.push(makeSetPiece(setDef));
+  const setOdds = Math.min(SET_DROP_CHANCE * setPoolSizeForBoss(boss.id), 0.45);
+  if (setDef && Math.random() < setOdds * mf) out.items.push(makeSetPiece(setDef));
+  // a stone for the socket, sometimes
+  if (typeof rollGem === "function" && Math.random() < GEM_DROP_CHANCE * mf) {
+    out.gems = out.gems || [];
+    out.gems.push(rollGem(boss.lvl));
+  }
   // bosses also always cough up a piece of ordinary gear
   out.items.push(generateItem({
     ilvl: boss.lvl + randInt(0, 2),

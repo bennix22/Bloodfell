@@ -56,6 +56,13 @@ function freshSave() {
 
     equipment: eq,
     inventory: [],
+    /* Loose gems, counted by "type:grade" the way materials are counted. */
+    gems: {},
+
+    /* The flask currently holding, if any: { id, name, mods }. A flask lasts a
+       whole run rather than a fight, and is lost when you die or withdraw. */
+    flask: null,
+
     /* The bank: items set aside on purpose. Nothing here is ever touched by
        auto-salvage, and it is not searched when equipping or selling, so it is
        safe long-term storage rather than a second bag. */
@@ -75,10 +82,6 @@ function freshSave() {
        rather than inside a fight. Each entry is { id, name, mods, remaining },
        and `remaining` only ticks down while you are actually fighting. */
     potionBuffs: [],
-
-    /* The merchant. Stock rotates on a real-world timer; you may pay to force it
-       early, at a price that doubles each time until the free rotation lands. */
-    merchant: { stock: [], nextRefresh: 0, forcedCount: 0 },
 
     killStreak: 0,        // consecutive wins; some Uniques feed on it
 
@@ -209,7 +212,6 @@ function retagSetPieces(save) {
   const fix = it => { if (it && it.setId) it.rarity = "set"; };
   if (save.inventory) save.inventory.forEach(fix);
   if (save.equipment) for (const k in save.equipment) fix(save.equipment[k]);
-  if (save.merchant && save.merchant.stock) save.merchant.stock.forEach(fix);
 }
 
 function migrate(save) {
@@ -228,6 +230,8 @@ function migrate(save) {
   sanitizeTalents(out);
   retagSetPieces(out);
   if (!Array.isArray(out.bank)) out.bank = [];   // saves from before the bank existed
+  if (!out.gems || typeof out.gems !== "object") out.gems = {};   // before gems existed
+  if (out.flask === undefined) out.flask = null;
   return out;
 }
 
@@ -316,4 +320,21 @@ function talentById(id) {
 function treeOfTalent(id) {
   for (const tree of TALENT_TREES) if (tree.talents.some(t => t.id === id)) return tree;
   return null;
+}
+
+/* Gems are counted the way materials are: a bag of "type:grade" keys. */
+function addGem(key, qty) {
+  S.gems[key] = (S.gems[key] || 0) + (qty || 1);
+}
+function takeGem(key, qty) {
+  const n = qty || 1;
+  if ((S.gems[key] || 0) < n) return false;
+  S.gems[key] -= n;
+  if (S.gems[key] <= 0) delete S.gems[key];
+  return true;
+}
+function gemCount() {
+  let n = 0;
+  for (const k in S.gems) n += S.gems[k];
+  return n;
 }

@@ -13,9 +13,7 @@
    ACQUISITION
      Each is tied to one raid boss at a low rate. Boss escalation means a boss
      you farm gets steadily harder, so a 2.5% drop is roughly the same forty
-     kills the rest of the drop tables assume. The merchant also has a small
-     chance of laying one out, which is what makes checking his table worth
-     doing at all.
+     kills the rest of the drop tables assume.
 
    BALANCE NOTE
      Several of these are deliberately double-edged. A Unique should be a build
@@ -378,9 +376,6 @@ const UNIQUES = [
   },
 ];
 
-/* Small chance that a merchant stock slot is a Unique instead of ordinary gear.
-   Low enough that seeing one is an event, high enough to justify restocking. */
-const MERCHANT_UNIQUE_CHANCE = 0.018;
 
 function uniqueById(id) { return UNIQUES.find(u => u.id === id) || null; }
 function uniquesForBoss(bossId) { return UNIQUES.filter(u => u.boss === bossId); }

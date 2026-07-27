@@ -72,7 +72,6 @@ const UI = {
     { id: "materials", label: "Materials", glyph: "\u26CF" },
     { id: "uniques", label: "Uniques", glyph: "❖" },
     { group: "Town" },
-    { id: "merchant", label: "Merchant", glyph: "\u2696" },
     { id: "settings", label: "Settings", glyph: "\u2699" },
   ],
 
@@ -161,7 +160,6 @@ const UI = {
       enchanting: renderEnchanting,
       materials: renderMaterials,
       uniques: renderUniques,
-      merchant: renderMerchant,
       settings: renderSettings,
     };
     const fn = map[this.route] || renderRealms;

@@ -7,7 +7,6 @@
 
        data-tip="inv:<uid>"     an item sitting in the inventory
        data-tip="eq:<slotKey>"  an item currently worn
-       data-tip="shop:<uid>"    an item on the merchant's table
        data-tip="stat:<key>"    a line on the character sheet
        data-tip="spell:<id>"    a spell, wherever it is listed
 
@@ -82,9 +81,6 @@ const Tooltip = {
       if (item) compare = bestWornFor(item);
     } else if (kind === "eq") {
       item = S.equipment[key];
-    } else if (kind === "shop") {
-      item = (S.merchant.stock || []).find(i => i.uid === key);
-      if (item) compare = bestWornFor(item);
     } else if (kind === "stat") {
       this.current = { plain: statExplainCard(key) };
       this.redraw(); this.place(x, y); return;
@@ -226,6 +222,16 @@ function tipCard(item, against, muted) {
        </div>`
     : item.proc
     ? `<div class="tip-proc"><b>${effectName(item.proc)}</b> \u2014 ${describeEffect(item.proc)}</div>` : "";
+
+  // sockets, and what is sitting in them
+  const socketLine = (item.sockets && item.sockets.length)
+    ? `<div class="socketrow">${item.sockets.map(k => {
+        const g = k && typeof gemById === "function" ? gemById(k) : null;
+        return g
+          ? `<span class="socket"><i class="socketdot" style="background:${g.colour}"></i>${g.name}</span>`
+          : `<span class="socket empty"><i class="socketdot" style="background:var(--edge-hi)"></i>empty socket</span>`;
+      }).join("")}</div>`
+    : "";
   const passiveLine = item.passive
     ? `<div class="tip-passive"><b>${item.passive.name}</b><span>${item.passive.text}</span></div>` : "";
   const flavourLine = item.flavour
@@ -242,6 +248,7 @@ function tipCard(item, against, muted) {
     ${handsLine}
     ${statRows ? `<div class="tip-block">${statRows}${missing}</div>` : ""}
     ${procLine}
+    ${socketLine}
     ${passiveLine}
     ${ench ? `<div class="tip-ench">\u2727 ${ench.name}</div>` : ""}
     ${setLine}

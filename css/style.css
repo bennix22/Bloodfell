@@ -1183,3 +1183,22 @@ input[type="range"] { accent-color: var(--brass); }
 }
 .brand-logo { display: block; width: 100%; height: auto; }
 .brand { padding: 14px 14px 12px; }
+
+/* ---- alchemy notes, gems and sockets ---- */
+.potnote { font-size: calc(11px * var(--fs)); color: var(--witch); margin-top: 3px; font-style: italic; }
+.socketrow { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-top: 6px; }
+.socket {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid var(--edge-hi); border-radius: var(--radius);
+  padding: 3px 8px; font-size: calc(11.5px * var(--fs)); background: var(--slate);
+}
+.socket.empty { color: var(--dim); border-style: dashed; }
+.socketdot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+.gemgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 7px; }
+.gemcard {
+  border: 1px solid var(--edge); border-left: 3px solid var(--brass);
+  border-radius: var(--radius); padding: 8px 10px; background: var(--slate);
+}
+.gemcard .gn { font-family: var(--serif); font-size: calc(12.5px * var(--fs)); }
+.gemcard .gd { font-size: calc(11px * var(--fs)); color: var(--ash); margin-top: 2px; }
+.gemcount { font-family: var(--mono); font-size: calc(10.5px * var(--fs)); color: var(--brass-hi); }

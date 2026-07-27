@@ -786,7 +786,7 @@ const Combat = {
   applyOpeningPotions() {
     for (const id of S.settings.buffPotions || []) {
       const po = potionById(id);
-      if (!po || po.kind !== "buff") continue;
+      if (!po || (po.kind !== "buff" && po.kind !== "elixir")) continue;
       if (S.potionBuffs.some(b => b.id === po.id)) continue;   // already active
       if (!takePotion(id, 1)) continue;
       S.potionBuffs.push({ id: po.id, name: po.name, mods: po.mods, remaining: po.duration });
@@ -860,6 +860,8 @@ const Combat = {
         const boss = all[Math.floor((S.descent.floor / DESCENT_WARDEN_EVERY - 1) % all.length)];
         const bl = rollBossLoot(boss, st.magicFind + descentMagicFind());
         for (const it of bl.items) { S.inventory.push(it); S.tally.items++; }
+        for (const g of bl.gems || []) addGem(g, 1);
+        result.gems = (result.gems || []).concat(bl.gems || []);
         result.items = result.items.concat(bl.items);
       }
       result.floor = S.descent.floor;
@@ -887,6 +889,8 @@ const Combat = {
 
       const loot = rollBossLoot(this.boss, st.magicFind);
       for (const it of loot.items) { S.inventory.push(it); S.tally.items++; }
+      for (const g of loot.gems || []) addGem(g, 1);
+      result.gems = loot.gems || [];
       result.items = loot.items;
 
       if (first) result.unlocked = applyBossUnlocks(this.boss);
@@ -915,6 +919,11 @@ const Combat = {
   lose() {
     this.active = false;
     S.tally.deaths++;
+    // a flask does not survive a defeat
+    if (S.flask) {
+      this.pushLog(`Your ${S.flask.name} is spilled.`, "potion");
+      S.flask = null;
+    }
     S.killStreak = 0;
     const lostDepth = S.run.depth;
     let descentEnd = null;
@@ -1075,6 +1084,8 @@ function currentVitals() {
 /* Walking away. Costs the run, restores the character. */
 function retreatFromRun() {
   const depth = S.run.depth;
+  // a flask holds for a run, and withdrawing ends the run
+  if (typeof clearFlask === "function") clearFlask("retreat");
   beginRun(null);
   saveGame();
   return depth;

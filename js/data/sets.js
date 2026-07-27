@@ -40,15 +40,15 @@ const SETS = [
   {
     id: "warplate", stat: "str",
     name: "Grimhold Warplate",
-    raid: "grimhold_keep", ilvl: 39,
+    raid: "obsidian_throne", ilvl: 45,
     blurb: "Garrison issue. The garrison has not been relieved and does not expect to be.",
     bonuses: {
-      2: { mods: { allDmg: 9, str: 24, agi: 24, int: 24 },
-           text: "+9% damage of every school, and +24 to Strength, Agility and Intellect." },
-      3: { mods: { crit: 5, critDmg: 18 },
-           text: "+5% critical strike and +18% critical damage." },
-      5: { effect: { id: "windfury", chance: 18, potency: 1 }, mods: { haste: 7 },
-           text: "+7% Haste, and an 18% chance on hit to strike again immediately." },
+      2: { mods: { allDmg: 10, str: 28, agi: 28, int: 28 },
+           text: "+10% damage of every school, and +28 to Strength, Agility and Intellect." },
+      3: { mods: { crit: 6, critDmg: 20 },
+           text: "+6% critical strike and +20% critical damage." },
+      5: { effect: { id: "windfury", chance: 19, potency: 1.1 }, mods: { haste: 8 },
+           text: "+8% Haste, and a 19% chance on hit to strike again immediately." },
     },
   },
   {
@@ -70,29 +70,29 @@ const SETS = [
   {
     id: "keepwatch", stat: "agi",
     name: "Keepwatch Leathers",
-    raid: "grimhold_keep", ilvl: 39,
+    raid: "sunken_cathedral", ilvl: 25,
     blurb: "Cut for the scouts who went over the wall instead of standing on it.",
     bonuses: {
-      2: { mods: { crit: 6, haste: 6 },
-           text: "+6% critical strike and +6% Haste." },
-      3: { mods: { critDmg: 20, dodge: 6 },
-           text: "+20% critical damage and +6% dodge." },
-      5: { effect: { id: "ambush", chance: 20, potency: 1.2 }, mods: { agi: 26 },
-           text: "+26 Agility, and a 20% chance on hit to strike from nowhere." },
+      2: { mods: { crit: 5, haste: 5 },
+           text: "+5% critical strike and +5% Haste." },
+      3: { mods: { critDmg: 16, dodge: 5 },
+           text: "+16% critical damage and +5% dodge." },
+      5: { effect: { id: "ambush", chance: 18, potency: 1.1 }, mods: { agi: 18 },
+           text: "+18 Agility, and an 18% chance on hit to strike from nowhere." },
     },
   },
   {
     id: "weeping", stat: "agi",
     name: "The Weeping Raiment",
-    raid: "the_weeping_wound", ilvl: 58,
+    raid: "obsidian_throne", ilvl: 45,
     blurb: "It never dried. It never will. The wound weeps for whoever wears it.",
     bonuses: {
-      2: { mods: { crit: 8, haste: 8 },
-           text: "+8% critical strike and +8% Haste." },
-      3: { mods: { critDmg: 26, allDmg: 8 },
-           text: "+26% critical damage and +8% damage of every school." },
-      5: { effect: { id: "windfury", chance: 20, potency: 1.2 }, mods: { agi: 42, haste: 6 },
-           text: "+42 Agility, +6% Haste, and a 20% chance on hit to strike a second time." },
+      2: { mods: { crit: 7, haste: 7 },
+           text: "+7% critical strike and +7% Haste." },
+      3: { mods: { critDmg: 22, allDmg: 7 },
+           text: "+22% critical damage and +7% damage of every school." },
+      5: { effect: { id: "windfury", chance: 20, potency: 1.15 }, mods: { agi: 30, haste: 5 },
+           text: "+30 Agility, +5% Haste, and a 20% chance on hit to strike a second time." },
     },
   },
   {
@@ -128,29 +128,29 @@ const SETS = [
   {
     id: "regalia", stat: "int",
     name: "Regalia of the Unfinished",
-    raid: "obsidian_throne", ilvl: 52,
+    raid: "obsidian_throne", ilvl: 45,
     blurb: "Cut from the same cloth as the great work, and just as short of complete.",
     bonuses: {
-      2: { mods: { allDmg: 12, str: 34, agi: 34, int: 34, spi: 34 },
-           text: "+12% damage of every school, and +34 to every primary stat." },
-      3: { mods: { lifesteal: 5, cdr: 15 },
-           text: "5% lifesteal and 15% shorter spell cooldowns." },
-      5: { effect: { id: "execute_proc", chance: 25, potency: 1.6 }, mods: { allDmg: 10, crit: 5 },
-           text: "+10% damage, +5% critical strike, and a 25% chance on hit to surge." },
+      2: { mods: { allDmg: 10, str: 28, agi: 28, int: 28, spi: 28 },
+           text: "+10% damage of every school, and +28 to every primary stat." },
+      3: { mods: { lifesteal: 4, cdr: 13 },
+           text: "4% lifesteal and 13% shorter spell cooldowns." },
+      5: { effect: { id: "execute_proc", chance: 23, potency: 1.5 }, mods: { allDmg: 8, crit: 4 },
+           text: "+8% damage, +4% critical strike, and a 23% chance on hit to surge." },
     },
   },
   {
     id: "sigil", stat: "int",
-    name: "Weeping Sigil Regalia",
-    raid: "the_weeping_wound", ilvl: 58,
+    name: "Sigil of the Last Dark",
+    raid: "the_last_dark", ilvl: 70,
     blurb: "Every sigil on it is the same word, written smaller and smaller.",
     bonuses: {
-      2: { mods: { magicDmg: 13, manaPct: 16 },
-           text: "+13% magical damage and +16% maximum Mana." },
-      3: { mods: { cdr: 16, int: 40 },
-           text: "16% shorter spell cooldowns and +40 Intellect." },
-      5: { effect: { id: "frostbite", chance: 22, potency: 1.5 }, mods: { magicDmg: 8 },
-           text: "+8% magical damage, and a 22% chance on hit to freeze the wound shut." },
+      2: { mods: { magicDmg: 14, manaPct: 18 },
+           text: "+14% magical damage and +18% maximum Mana." },
+      3: { mods: { cdr: 18, int: 48 },
+           text: "18% shorter spell cooldowns and +48 Intellect." },
+      5: { effect: { id: "frostbite", chance: 24, potency: 1.6 }, mods: { magicDmg: 10, int: 20 },
+           text: "+10% magical damage, +20 Intellect, and a 24% chance on hit to freeze the dark solid." },
     },
   },
 
@@ -158,29 +158,29 @@ const SETS = [
   {
     id: "longwatch", stat: "spi",
     name: "Vestments of the Long Watch",
-    raid: "grimhold_keep", ilvl: 39,
+    raid: "sunken_cathedral", ilvl: 25,
     blurb: "Someone has to stay awake, and someone has to keep the ones who do alive.",
     bonuses: {
-      2: { mods: { spi: 26, healPct: 14 },
-           text: "+26 Spirit and +14% healing received." },
-      3: { mods: { lifesteal: 4, dr: 4 },
-           text: "4% lifesteal and 4% damage reduction." },
-      5: { effect: { id: "leech", chance: 20, potency: 1.3 }, mods: { spi: 20 },
-           text: "+20 Spirit, and a 20% chance on hit to draw life across." },
+      2: { mods: { spi: 18, healPct: 12 },
+           text: "+18 Spirit and +12% healing received." },
+      3: { mods: { lifesteal: 3, dr: 3 },
+           text: "3% lifesteal and 3% damage reduction." },
+      5: { effect: { id: "leech", chance: 18, potency: 1.1 }, mods: { spi: 14 },
+           text: "+14 Spirit, and an 18% chance on hit to draw life across." },
     },
   },
   {
     id: "litany", stat: "spi",
     name: "Litany of the Unfinished",
-    raid: "obsidian_throne", ilvl: 52,
+    raid: "obsidian_throne", ilvl: 45,
     blurb: "A prayer with no last line. Saying it is the point; finishing it is not.",
     bonuses: {
-      2: { mods: { spi: 34, healPct: 16 },
-           text: "+34 Spirit and +16% healing received." },
-      3: { mods: { lifesteal: 5, cdr: 12 },
-           text: "5% lifesteal and 12% shorter spell cooldowns." },
-      5: { effect: { id: "soulsiphon", chance: 22, potency: 1.4 }, mods: { spi: 26, dr: 4 },
-           text: "+26 Spirit, 4% damage reduction, and a 22% chance on hit to siphon." },
+      2: { mods: { spi: 28, healPct: 14 },
+           text: "+28 Spirit and +14% healing received." },
+      3: { mods: { lifesteal: 4, cdr: 11 },
+           text: "4% lifesteal and 11% shorter spell cooldowns." },
+      5: { effect: { id: "soulsiphon", chance: 21, potency: 1.35 }, mods: { spi: 20, dr: 3 },
+           text: "+20 Spirit, 3% damage reduction, and a 21% chance on hit to siphon." },
     },
   },
   {
@@ -223,8 +223,9 @@ const SET_PIECE_NAMES = {
           "Drowned Choir Wraps", "Drowned Choir Slippers"],
   regalia: ["Crown of the Unfinished", "Mantle of the Unfinished", "Vestment of the Unfinished",
             "Grips of the Unfinished", "Leggings of the Unfinished"],
-  sigil: ["Weeping Sigil Crown", "Weeping Sigil Mantle", "Weeping Sigil Robe",
-          "Weeping Sigil Handwraps", "Weeping Sigil Leggings"],
+  sigil: ["Sigil Crown of the Last Dark", "Sigil Mantle of the Last Dark",
+          "Sigil Robe of the Last Dark", "Sigil Handwraps of the Last Dark",
+          "Sigil Leggings of the Last Dark"],
   longwatch: ["Longwatch Hood", "Longwatch Shoulderwraps", "Longwatch Robe",
               "Longwatch Handwraps", "Longwatch Sandals"],
   litany: ["Litany Circlet", "Litany Mantle", "Litany Vestment",
@@ -246,22 +247,31 @@ function setById(id) { return SETS.find(s => s.id === id) || null; }
 
 /* Boss one of a raid guards the helm, boss two the shoulders, and so on, so a
    complete set means clearing the whole raid rather than farming one encounter.
-   A raid hosts two or three sets; the one that drops is the set built around how
-   this character actually fights, so you are steered toward the set you want.
-   If the raid hosts nothing for your stat, any of its sets can turn up — the raw
-   stats on the piece still follow your build, so it is never wasted. */
+   A raid hosts one to four sets and the one that drops is chosen at random, NOT
+   filtered by how you have built. That is deliberate: assembling a Strength set
+   on an Intellect character is exactly the kind of thing that should tempt you
+   into changing how you fight, and it cannot tempt you if it never drops. */
 function setPieceForBoss(bossId) {
   for (const raid of RAIDS) {
     const idx = raid.bosses.findIndex(b => b.id === bossId);
     if (idx < 0) continue;
     const pool = SETS.filter(s => s.raid === raid.id);
     if (!pool.length || idx >= SET_SLOTS.length) return null;
-    const want = typeof dominantPrimary === "function" ? dominantPrimary() : null;
-    const set = pool.find(s => s.stat === want)
-      || pool[Math.floor(Math.random() * pool.length)];
-    return setPieceDef(set, idx);
+    return setPieceDef(pool[Math.floor(Math.random() * pool.length)], idx);
   }
   return null;
+}
+
+/* How many sets a raid hosts. Drop odds are multiplied by this so that spreading
+   a raid across several sets does not quietly make each one take four times as
+   long to finish. */
+function setPoolSizeForBoss(bossId) {
+  for (const raid of RAIDS) {
+    if (raid.bosses.some(b => b.id === bossId)) {
+      return SETS.filter(s => s.raid === raid.id).length || 1;
+    }
+  }
+  return 1;
 }
 
 /* The definition for one piece, built from the set and its index. */

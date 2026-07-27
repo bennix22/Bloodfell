@@ -93,6 +93,11 @@ function collectEffects() {
   for (const slot of SLOTS) {
     const item = S.equipment[slot.key];
     if (item && item.proc) add(item.proc.id, item.proc.chance, item.proc.potency || 1);
+    // a gem may carry a proc of its own, which merges like any other source
+    for (const key of (item && item.sockets) || []) {
+      const g = key && typeof gemById === "function" ? gemById(key) : null;
+      if (g && g.effect) add(g.effect.id, g.effect.chance, g.effect.potency || 1);
+    }
   }
   // set bonuses can grant procs too, and merge with everything else
   for (const s of collectSets()) {
@@ -140,6 +145,11 @@ function collectPersistentMods() {
     const item = S.equipment[slot.key];
     if (!item) continue;
     addMods(mods, item.stats);
+    // socketed gems
+    for (const key of item.sockets || []) {
+      const g = key && typeof gemById === "function" ? gemById(key) : null;
+      if (g) addMods(mods, g.mods);
+    }
     if (item.enchant) {
       const e = ENCHANTS.find(x => x.id === item.enchant);
       if (e) addMods(mods, e.mods);
@@ -153,6 +163,9 @@ function collectPersistentMods() {
 
   // boons chosen during a Descent
   addMods(mods, descentBoonMods());
+
+  // the flask currently holding, if any
+  if (S.flask && S.flask.mods) addMods(mods, S.flask.mods);
 
   // passives that change the character sheet rather than the fight
   addMods(mods, passiveStatMods());

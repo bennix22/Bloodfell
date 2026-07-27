@@ -159,6 +159,7 @@ function beginDescent() {
 
 function endDescent(reason) {
   const floor = S.descent.floor;
+  if (typeof clearFlask === "function") clearFlask("descent end");
   const best = Math.max(S.descent.best || 0, floor - 1);
   // a snapshot of the run just ended, for the recap shown next time you open the page
   S.lastDescent = {

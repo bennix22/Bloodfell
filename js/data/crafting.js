@@ -176,4 +176,43 @@ const POTIONS = [
     mods: { haste: 25, crit: 9 }, mats: { m_herb5: 4, m_ess5: 2 } },
   { id: "po_b_luck3", name: "Prospector's Tincture", tier: 3, kind: "buff", req: 24, gold: 500, duration: 30,
     mods: { goldFind: 30, magicFind: 15 }, mats: { m_herb3: 5, m_ess3: 2 } },
+
+  /* ---- COMBAT ELIXIRS ----------------------------------------------------
+     An elixir gives more than a draught of the same tier and takes something
+     back. They fire at the start of a fight exactly like a buff potion, so an
+     elixir is a standing decision about how you want to fight rather than a
+     button to press. The downside is real: read it before brewing fifty. */
+  { id: "po_e_reckless3", name: "Reckless Elixir", tier: 3, kind: "elixir", req: 24, gold: 600, duration: 30,
+    mods: { allDmg: 30, healPct: -25 }, mats: { m_herb3: 5, m_ess3: 2 },
+    note: "Everything you hit, harder \u2014 but every heal is weaker." },
+  { id: "po_e_glass4", name: "Glassblood Elixir", tier: 4, kind: "elixir", req: 34, gold: 1400, duration: 30,
+    mods: { crit: 18, critDmg: 35, dr: -12 }, mats: { m_herb4: 5, m_ess4: 2 },
+    note: "You strike like a razor and take blows like glass." },
+  { id: "po_e_leech4", name: "Elixir of the Leech", tier: 4, kind: "elixir", req: 34, gold: 1400, duration: 30,
+    mods: { lifesteal: 12, allDmg: -10 }, mats: { m_herb4: 5, m_ess4: 2 },
+    note: "Feed on what you kill, at the cost of how hard you kill it." },
+  { id: "po_e_bulwark5", name: "Elixir of the Bulwark", tier: 5, kind: "elixir", req: 43, gold: 3600, duration: 30,
+    mods: { dr: 18, armorPct: 40, haste: -20 }, mats: { m_herb5: 5, m_ess5: 2 },
+    note: "Immovable, and slow with it." },
+  { id: "po_e_hunger6", name: "Elixir of Hunger", tier: 6, kind: "elixir", req: 55, gold: 9000, duration: 30,
+    mods: { allDmg: 45, hpPct: -25 }, mats: { m_herb6: 6, m_ess6: 3 },
+    note: "A quarter of your health, traded for ruin." },
+
+  /* ---- FLASKS ------------------------------------------------------------
+     A flask is not drunk for a fight; it is drunk for a RUN. It holds until you
+     die or leave, through as many fights as you can string together, which
+     makes a Descent something you prepare for rather than something you start.
+     One at a time: drinking a second replaces the first. */
+  { id: "po_f_iron3", name: "Flask of Iron Hours", tier: 3, kind: "flask", req: 24, gold: 900,
+    mods: { hpPct: 12, armorPct: 20 }, mats: { m_herb3: 6, m_ess3: 3 },
+    note: "Holds for the whole run." },
+  { id: "po_f_war4", name: "Flask of the Long War", tier: 4, kind: "flask", req: 34, gold: 2200,
+    mods: { allDmg: 18, crit: 6 }, mats: { m_herb4: 6, m_ess4: 3 },
+    note: "Holds for the whole run." },
+  { id: "po_f_tide5", name: "Flask of the Turning Tide", tier: 5, kind: "flask", req: 43, gold: 5200,
+    mods: { haste: 18, lifesteal: 6 }, mats: { m_herb5: 6, m_ess5: 3 },
+    note: "Holds for the whole run." },
+  { id: "po_f_deep6", name: "Flask of the Deep", tier: 6, kind: "flask", req: 55, gold: 12000,
+    mods: { allDmg: 22, dr: 10, hpPct: 15 }, mats: { m_herb6: 8, m_ess6: 4 },
+    note: "Holds for the whole run." },
 ];

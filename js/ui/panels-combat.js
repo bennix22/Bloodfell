@@ -19,7 +19,7 @@ function combatControls() {
       return `<option value="${p.id}"${sel}>${p.name} (${n})</option>`;
     }).join("");
 
-  const buffOpts = POTIONS.filter(p => p.kind === "buff")
+  const buffOpts = POTIONS.filter(p => p.kind === "buff" || p.kind === "elixir")
     .map(p => {
       const n = S.potions[p.id] || 0;
       const on = (s.buffPotions || []).includes(p.id);
@@ -347,78 +347,6 @@ function renderRaids() {
     ${combatControls()}
     ${(Combat.active || UI.grind) ? arenaHtml() : ""}
     ${blocks}`;
-}
-
-/* ------------------------------------------------------------- merchant -- */
-function renderMerchant() {
-  tickMerchant();
-
-  const ms = merchantMsLeft();
-  const mins = Math.floor(ms / 60000), secs = Math.floor((ms % 60000) / 1000);
-  const cost = merchantForceCost();
-
-  const rows = (S.merchant.stock || []).map(item => {
-    const delta = upgradeDelta(item);
-    const up = delta > 0 ? `<span class="upgrade">\u25B2 +${delta}</span>` : "";
-    const afford = S.gold >= item.price;
-    return `<div class="itemrow b-${item.rarity}" data-tip="shop:${item.uid}">
-      <div class="main">
-        <div class="nm r-${item.rarity}">${item.name} ${up}</div>
-        <div class="sub">${slotLabel(item.slot)} \u00B7 item level ${item.ilvl} \u00B7 ${RARITIES[item.rarity].name}</div>
-        ${itemStatGrid(item)}
-      </div>
-      <div class="acts">
-        <button class="btn sm ${afford ? "primary" : ""}" ${afford ? "" : "disabled"}
-                onclick="doBuy('${item.uid}')">${fmt(item.price)}g</button>
-      </div>
-    </div>`;
-  }).join("");
-
-  return `<div class="phead">
-      <h2>The Wandering Merchant</h2>
-      <p>Somewhere to put the gold. Most of what is laid out here is worse than what you could
-         farm yourself &mdash; but not always, and the stock changes. Buying is a gamble, and so is
-         paying to see the next lot early.</p>
-    </div>
-
-    <div class="panel">
-      <div class="ctrlbar">
-        <span style="font-size:15px">Purse:
-          <b style="color:var(--brass-hi);font-family:var(--mono)">${fmt(S.gold)}</b> gold</span>
-        <span style="flex:1"></span>
-        <span style="color:var(--ash);font-family:var(--mono);font-size:11.5px">
-          new stock in ${mins}m ${String(secs).padStart(2, "0")}s</span>
-        <button class="btn ${S.gold >= cost ? "" : ""}" ${S.gold >= cost ? "" : "disabled"}
-                onclick="doForceRefresh()">Restock now &mdash; ${fmt(cost)}g</button>
-      </div>
-      ${S.merchant.forcedCount ? `<div class="meta" style="color:var(--dim)">
-        the price doubles each time you force it, and resets when the free restock arrives</div>` : ""}
-    </div>
-
-    <div class="panel">
-      <h3>On the table</h3>
-      <div class="itemlist">${rows || `<div class="empty">Nothing left. Wait, or pay for a restock.</div>`}</div>
-    </div>`;
-}
-
-function doBuy(uid) {
-  const res = buyFromMerchant(uid);
-  if (res.ok) { Sound.play("coin", 0); UI.toast(`Bought <span class="r-${res.item.rarity}">${res.item.name}</span>`, "good"); UI.render(); }
-  else UI.say(res);
-}
-function doForceRefresh() {
-  const res = forceMerchantRefresh();
-  if (res.ok) Sound.play("coin", 0);
-  UI.say(res);
-}
-
-function startBoss(id) {
-  const boss = bossById(id);
-  if (!boss) return;
-  UI.grind = { mode: "boss", id };
-  Combat.log = [];
-  Combat.start("boss", boss);
-  UI.render();
 }
 
 /* --------------------------------------------------------------- descent -- */

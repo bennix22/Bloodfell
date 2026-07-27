@@ -123,8 +123,6 @@ function frame(now) {
   if (sinceSave > 20) {
     sinceSave = 0;
     saveGame();
-    // rotate the merchant's stock when its timer comes round
-    if (tickMerchant() && UI.route === "merchant") UI.render();
   }
 
   requestAnimationFrame(frame);
@@ -135,7 +133,6 @@ function boot() {
   Sound.init();
   Theme.apply(S.settings.theme || "grimoire");
   Theme.applyTextScale(S.settings.textScale);
-  tickMerchant();
   UI.mount();
   if (!STORAGE_OK) {
     UI.toast("Local storage is blocked here. Use Save file to keep a copy.", "bad");

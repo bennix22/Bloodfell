@@ -119,6 +119,8 @@ function renderBlacksmith() {
           </div>`}
     </div>
 
+    ${renderSmithWorkshops()}
+
     ${materialsPanel("metal hide wood essence")}`;
 }
 
@@ -133,21 +135,150 @@ function doForge() {
   } else UI.say(res);
 }
 
+
+/* ------------------------------------------------- tempering & socketing */
+/* Both workshops act on one chosen item, so they share a picker. Uniques are
+   left out of it: they cannot be tempered or socketed. */
+function smithTargets() {
+  const out = [];
+  for (const sl of SLOTS) {
+    const it = S.equipment[sl.key];
+    if (it && !it.uniqueId) out.push({ item: it, worn: true });
+  }
+  for (const it of S.inventory) if (!it.uniqueId) out.push({ item: it, worn: false });
+  return out;
+}
+
+function smithChosen() {
+  const targets = smithTargets();
+  const want = UI.tab.smithUid;
+  return targets.find(t => t.item.uid === want) || targets[0] || null;
+}
+
+function socketStrip(item) {
+  const sockets = socketsOn(item);
+  if (!sockets.length) return `<span class="socket empty">no sockets</span>`;
+  return sockets.map((key, i) => {
+    const g = key ? gemById(key) : null;
+    return g
+      ? `<span class="socket"><i class="socketdot" style="background:${g.colour}"></i>${g.name}
+           <button class="btn sm" onclick="doClearSocket('${item.uid}',${i})">prise out</button></span>`
+      : `<span class="socket empty"><i class="socketdot" style="background:var(--edge-hi)"></i>empty</span>`;
+  }).join("");
+}
+
+function renderSmithWorkshops() {
+  const chosen = smithChosen();
+  const targets = smithTargets();
+
+  const picker = `<select onchange="UI.tab.smithUid=this.value;UI.render()">
+    ${targets.map(t => `<option value="${t.item.uid}" ${chosen && t.item.uid === chosen.item.uid ? "selected" : ""}>
+      ${t.item.name}${t.worn ? " (worn)" : ""} \u2014 ilvl ${t.item.ilvl}</option>`).join("")}
+  </select>`;
+
+  if (!chosen) {
+    return `<div class="panel"><h3>Tempering and socketing</h3>
+      <div class="empty" style="padding:20px">Nothing to work on. Uniques cannot be tempered or socketed.</div></div>`;
+  }
+
+  const item = chosen.item;
+  const steps = temperSteps(item);
+  const tCost = temperCost(item);
+  const tCheck = canTemper(item.uid);
+  const sCost = socketCost(item);
+  const sCheck = canAddSocket(item.uid);
+  const maxSock = maxSocketsFor(item);
+
+  // gems owned, for filling a socket
+  const owned = Object.keys(S.gems || {}).filter(k => S.gems[k] > 0);
+  const emptyIdx = socketsOn(item).indexOf(null);
+  const gemButtons = owned.length && emptyIdx >= 0
+    ? owned.map(k => {
+        const g = gemById(k);
+        if (!g) return "";
+        return `<button class="btn sm" onclick="doSetGem('${item.uid}',${emptyIdx},'${k}')">
+          ${g.name} <span class="gemcount">\u00D7${S.gems[k]}</span></button>`;
+      }).join("")
+    : "";
+
+  return `<div class="panel">
+    <h3>Tempering</h3>
+    <p>Raise a piece by ${TEMPER_STEP} item levels and rescale its stats to match. Up to
+       ${TEMPER_MAX_STEPS} times per item, never past item level ${TEMPER_ILVL_CAP}. Uniques cannot be tempered.</p>
+    <div class="invhead">${picker}</div>
+    <div class="reciperow">
+      <div class="rn"><span class="r-${item.rarity}">${item.name}</span>
+        <div class="cost" style="margin-top:2px">
+          item level ${item.ilvl} \u2192 ${item.ilvl + TEMPER_STEP} \u00B7 tempered ${steps}/${TEMPER_MAX_STEPS}
+          \u00B7 ${costText(tCost.mats, tCost.gold)}</div>
+      </div>
+      <button class="btn sm ${tCheck.ok ? "primary" : ""}" ${tCheck.ok ? "" : "disabled"}
+        onclick="doTemper('${item.uid}')">Temper</button>
+    </div>
+    ${tCheck.ok ? "" : `<div class="meta" style="color:var(--dim);margin-top:4px">${tCheck.msg}</div>`}
+  </div>
+
+  <div class="panel">
+    <h3>Socketing</h3>
+    <p>Cut a socket and set a gem in it. ${RARITIES[item.rarity].name} items hold up to ${maxSock}.
+       Prising a gem out breaks it, so choose deliberately.</p>
+    <div class="reciperow">
+      <div class="rn"><span class="r-${item.rarity}">${item.name}</span>
+        <div class="cost" style="margin-top:2px">
+          ${socketsOn(item).length} of ${maxSock} sockets \u00B7 ${costText(sCost.mats, sCost.gold)}</div>
+        <div class="socketrow">${socketStrip(item)}</div>
+      </div>
+      <button class="btn sm ${sCheck.ok ? "primary" : ""}" ${sCheck.ok ? "" : "disabled"}
+        onclick="doAddSocket('${item.uid}')">Cut socket</button>
+    </div>
+    ${sCheck.ok ? "" : `<div class="meta" style="color:var(--dim);margin-top:4px">${sCheck.msg}</div>`}
+    ${gemButtons ? `<div style="margin-top:10px">
+      <div class="meta" style="margin-bottom:4px">Set a gem into the next empty socket</div>
+      <div class="chiprow">${gemButtons}</div></div>` : ""}
+  </div>
+
+  <div class="panel">
+    <h3>Gems held</h3>
+    <p>Stones fall from raid bosses and Wardens. Jewelworking will one day cut them from rough gems;
+       for now, what drops is what you have.</p>
+    ${owned.length ? `<div class="gemgrid">${owned.map(k => {
+      const g = gemById(k);
+      if (!g) return "";
+      const what = g.effect
+        ? `${g.effect.chance}% chance of ${effectName ? effectName(g.effect) : g.stat}`
+        : Object.keys(g.mods).map(x => statLine(x, g.mods[x])).join(", ");
+      return `<div class="gemcard" style="border-left-color:${g.colour}">
+        <div class="gn">${g.name} <span class="gemcount">\u00D7${S.gems[k]}</span></div>
+        <div class="gd">${what}</div></div>`;
+    }).join("")}</div>` : `<div class="empty" style="padding:18px">No gems yet. Raid bosses drop them.</div>`}
+  </div>`;
+}
+
+function doTemper(uid) { Sound.play("craft", 0); UI.say(temperItem(uid)); }
+function doAddSocket(uid) { Sound.play("craft", 0); UI.say(addSocket(uid)); }
+function doSetGem(uid, i, key) { Sound.play("craft", 0); UI.say(setGem(uid, i, key)); }
+function doClearSocket(uid, i) { UI.say(clearSocket(uid, i)); }
+
 /* --------------------------------------------------------------- alchemy */
 function renderAlchemy() {
   const groups = [
     { label: "Health", kind: "heal" },
     { label: "Mana", kind: "mana" },
     { label: "Combat draughts", kind: "buff" },
+    { label: "Combat elixirs \u2014 stronger, at a price", kind: "elixir" },
+    { label: "Flasks \u2014 last the whole run", kind: "flask" },
   ];
 
   const blocks = groups.map(g => {
     const rows = POTIONS.filter(p => p.kind === g.kind).map(p => {
       const have = S.potions[p.id] || 0;
       const okLevel = S.level >= p.req;
-      const what = p.kind === "buff"
-        ? Object.keys(p.mods).map(k => statLine(k, p.mods[k])).join(", ") + ` for ${p.duration}s`
-        : `restores ${p.pct}% ${p.kind === "heal" ? "health" : "mana"}`;
+      const modText = p.mods ? Object.keys(p.mods).map(k => statLine(k, p.mods[k])).join(", ") : "";
+      const what = (p.kind === "buff" || p.kind === "elixir")
+        ? modText + ` for ${p.duration}s`
+        : p.kind === "flask"
+          ? modText + " until you fall or withdraw"
+          : `restores ${p.pct}% ${p.kind === "heal" ? "health" : "mana"}`;
       const canOne = okLevel && S.gold >= p.gold && hasMaterials(p.mats);
       const canFive = okLevel && S.gold >= p.gold * 5 &&
         Object.keys(p.mats).every(id => (S.materials[id] || 0) >= p.mats[id] * 5);
@@ -156,9 +287,12 @@ function renderAlchemy() {
         <div class="rn">
           ${p.name} <span style="color:var(--brass-hi);font-family:var(--mono);font-size:11px">\u00D7${have}</span>
           <div class="cost" style="margin-top:2px">${what} \u00B7 ${costText(p.mats, p.gold)}</div>
+          ${p.note ? `<div class="potnote">${p.note}</div>` : ""}
         </div>
         ${okLevel
-          ? `<button class="btn sm ${canOne ? "primary" : ""}" ${canOne ? "" : "disabled"} onclick="doBrew('${p.id}',1)">Brew</button>
+          ? `${p.kind === "flask" && have > 0
+               ? `<button class="btn sm" onclick="doDrinkFlask('${p.id}')">Drink</button>` : ""}
+             <button class="btn sm ${canOne ? "primary" : ""}" ${canOne ? "" : "disabled"} onclick="doBrew('${p.id}',1)">Brew</button>
              <button class="btn sm" ${canFive ? "" : "disabled"} onclick="doBrew('${p.id}',5)">\u00D75</button>`
           : `<span class="tag red">level ${p.req}</span>`}
       </div>`;
@@ -166,16 +300,26 @@ function renderAlchemy() {
     return `<div class="panel"><h3>${g.label}</h3>${rows}</div>`;
   }).join("");
 
+  const flaskNow = S.flask
+    ? `<div class="panel"><h3>Holding</h3>
+        <div class="reciperow"><div class="rn">${S.flask.name}
+          <div class="cost" style="margin-top:2px">${Object.keys(S.flask.mods).map(k => statLine(k, S.flask.mods[k])).join(", ")}
+            \u00B7 lasts until you fall or withdraw</div></div></div></div>`
+    : "";
+
   return `<div class="phead">
       <h2>Alchemy</h2>
       <p>Herbs into potions. Health potions drink themselves when you drop below the threshold set in
-         Combat settings; draughts fire at the opening of every fight. Both are configured on the Realms panel.</p>
+         Combat settings; draughts and elixirs fire at the opening of every fight, and are chosen on the
+         Realms panel. A flask is drunk here and holds for a whole run.</p>
     </div>
+    ${flaskNow}
     ${blocks}
     ${materialsPanel("herb essence")}`;
 }
 
 function doBrew(id, n) { UI.say(brewPotion(id, n)); }
+function doDrinkFlask(id) { Sound.play("potion", 0); UI.say(drinkFlask(id)); }
 
 /* ------------------------------------------------------------ enchanting */
 function renderEnchanting() {
@@ -462,7 +606,7 @@ function renderUniques() {
       <p style="color:var(--ash);font-size:12.5px;margin:0 0 4px">
         Each is guarded by one raid boss. Bosses grow stronger every time you kill them, so a low
         drop rate and a hardening boss are the same problem &mdash; you get a few dozen attempts before
-        you need better gear. The merchant also lays one out now and then.</p>
+        you need better gear.</p>
     </div>
     <div class="grid g2">${cards}</div>`;
 }

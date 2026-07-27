@@ -501,3 +501,214 @@ function resetTalents() {
   saveGame();
   return { ok: true, msg: "All talent points refunded." };
 }
+
+/* ===========================================================================
+   TEMPERING — raising an item's level a little at a time.
+   ---------------------------------------------------------------------------
+   Each temper adds TEMPER_STEP item levels and rescales the item's stats onto
+   the new budget, so a piece you like can keep pace instead of being retired.
+   Costs climb steeply with each step, which is the point: this is where gold
+   goes once you have everything you want.
+
+   Uniques cannot be tempered. Their stats are hand written to a specific power
+   level and rescaling them by budget would quietly undo that balance.
+   =========================================================================== */
+const TEMPER_STEP = 2;
+const TEMPER_MAX_STEPS = 5;      // +10 item levels over an item's lifetime
+const TEMPER_ILVL_CAP = 75;      // never past the level cap's gear
+
+function findAnyItem(uidStr) {
+  const inv = S.inventory.find(i => i.uid === uidStr);
+  if (inv) return { item: inv, where: "inventory" };
+  for (const s of SLOTS) {
+    const it = S.equipment[s.key];
+    if (it && it.uid === uidStr) return { item: it, where: "equipped" };
+  }
+  const bank = (S.bank || []).find(i => i.uid === uidStr);
+  if (bank) return { item: bank, where: "bank" };
+  return null;
+}
+
+function temperSteps(item) { return item.tempered || 0; }
+
+function temperCost(item) {
+  const step = temperSteps(item) + 1;
+  const tier = tierForIlvl(item.ilvl);
+  const gold = Math.round(40 * item.ilvl * Math.pow(step, 1.7));
+  const mats = {};
+  mats["m_ore" + Math.min(6, Math.max(1, tier))] = 4 + step * 2;
+  mats["m_ess" + Math.min(6, Math.max(1, tier))] = step;
+  return { gold, mats };
+}
+
+function canTemper(uidStr) {
+  const found = findAnyItem(uidStr);
+  if (!found) return { ok: false, msg: "That item is gone." };
+  const item = found.item;
+  if (item.uniqueId) return { ok: false, msg: "A Unique cannot be tempered." };
+  if (temperSteps(item) >= TEMPER_MAX_STEPS) {
+    return { ok: false, msg: `${item.name} has been tempered as far as it will go.` };
+  }
+  if (item.ilvl + TEMPER_STEP > TEMPER_ILVL_CAP) {
+    return { ok: false, msg: `Nothing can be tempered past item level ${TEMPER_ILVL_CAP}.` };
+  }
+  const cost = temperCost(item);
+  if (S.gold < cost.gold) return { ok: false, msg: "Not enough gold." };
+  for (const id in cost.mats) {
+    if ((S.materials[id] || 0) < cost.mats[id]) return { ok: false, msg: "Not enough materials." };
+  }
+  return { ok: true };
+}
+
+function temperItem(uidStr) {
+  const check = canTemper(uidStr);
+  if (!check.ok) return check;
+  const { item } = findAnyItem(uidStr);
+  const cost = temperCost(item);
+
+  S.gold -= cost.gold;
+  for (const id in cost.mats) takeMaterial(id, cost.mats[id]);
+
+  const from = item.ilvl;
+  const to = from + TEMPER_STEP;
+  const ratio = itemBudget(to) / itemBudget(from);
+
+  for (const k in item.stats) {
+    const v = item.stats[k] * ratio;
+    // primaries, stamina and armour are whole; percentages keep one decimal
+    item.stats[k] = ["str", "agi", "int", "spi", "sta", "armor"].includes(k)
+      ? Math.round(v) : Math.round(v * 10) / 10;
+  }
+  if (item.weapon) {
+    item.weapon.min = Math.round(item.weapon.min * ratio);
+    item.weapon.max = Math.round(item.weapon.max * ratio);
+  }
+  item.ilvl = to;
+  item.tier = tierForIlvl(to);
+  item.tempered = temperSteps(item) + 1;
+  item.value = Math.round((item.value || 0) * ratio);
+
+  saveGame();
+  return { ok: true, msg: `${item.name} tempered to item level ${to}.` };
+}
+
+/* ===========================================================================
+   SOCKETING — cutting a socket, and what goes in it.
+   ---------------------------------------------------------------------------
+   Sockets are cut one at a time and cost gold and metal. A gem dropped into a
+   socket can be swapped whenever you like, but prising the old one out breaks
+   it, so it is a real decision rather than free experimentation.
+   =========================================================================== */
+const MAX_SOCKETS = { common: 0, uncommon: 1, rare: 2, epic: 2, legendary: 3, set: 3, unique: 0 };
+const SOCKET_MIN_ILVL = 15;
+
+function socketsOn(item) { return item.sockets || []; }
+function maxSocketsFor(item) { return MAX_SOCKETS[item.rarity] !== undefined ? MAX_SOCKETS[item.rarity] : 0; }
+
+function socketCost(item) {
+  const n = socketsOn(item).length + 1;
+  const tier = tierForIlvl(item.ilvl);
+  const gold = Math.round(120 * item.ilvl * Math.pow(n, 1.5));
+  const mats = {};
+  mats["m_ore" + Math.min(6, Math.max(1, tier))] = 6 + n * 4;
+  return { gold, mats };
+}
+
+function canAddSocket(uidStr) {
+  const found = findAnyItem(uidStr);
+  if (!found) return { ok: false, msg: "That item is gone." };
+  const item = found.item;
+  if (item.uniqueId) return { ok: false, msg: "A Unique will not take a socket." };
+  if (item.ilvl < SOCKET_MIN_ILVL) {
+    return { ok: false, msg: `Sockets need item level ${SOCKET_MIN_ILVL} or better.` };
+  }
+  const max = maxSocketsFor(item);
+  if (!max) return { ok: false, msg: `${RARITIES[item.rarity].name} items will not hold a socket.` };
+  if (socketsOn(item).length >= max) {
+    return { ok: false, msg: `${item.name} already has all ${max} of its sockets.` };
+  }
+  const cost = socketCost(item);
+  if (S.gold < cost.gold) return { ok: false, msg: "Not enough gold." };
+  for (const id in cost.mats) {
+    if ((S.materials[id] || 0) < cost.mats[id]) return { ok: false, msg: "Not enough materials." };
+  }
+  return { ok: true };
+}
+
+function addSocket(uidStr) {
+  const check = canAddSocket(uidStr);
+  if (!check.ok) return check;
+  const { item } = findAnyItem(uidStr);
+  const cost = socketCost(item);
+  S.gold -= cost.gold;
+  for (const id in cost.mats) takeMaterial(id, cost.mats[id]);
+  item.sockets = socketsOn(item).slice();
+  item.sockets.push(null);
+  saveGame();
+  return { ok: true, msg: `A socket is cut into ${item.name}.` };
+}
+
+function setGem(uidStr, index, gemKeyStr) {
+  const found = findAnyItem(uidStr);
+  if (!found) return { ok: false, msg: "That item is gone." };
+  const item = found.item;
+  const sockets = socketsOn(item);
+  if (index < 0 || index >= sockets.length) return { ok: false, msg: "No such socket." };
+  if (!(S.gems[gemKeyStr] > 0)) return { ok: false, msg: "You have none of that gem." };
+  const gem = gemById(gemKeyStr);
+  if (!gem) return { ok: false, msg: "That gem does not exist." };
+
+  const old = sockets[index];
+  if (!takeGem(gemKeyStr, 1)) return { ok: false, msg: "You have none of that gem." };
+  item.sockets = sockets.slice();
+  item.sockets[index] = gemKeyStr;
+  saveGame();
+  const oldName = old ? gemById(old) : null;
+  return {
+    ok: true,
+    msg: oldName ? `${gem.name} set; the ${oldName.name} broke coming out.`
+                 : `${gem.name} set into ${item.name}.`,
+  };
+}
+
+function clearSocket(uidStr, index) {
+  const found = findAnyItem(uidStr);
+  if (!found) return { ok: false, msg: "That item is gone." };
+  const item = found.item;
+  const sockets = socketsOn(item);
+  if (!sockets[index]) return { ok: false, msg: "That socket is already empty." };
+  const gem = gemById(sockets[index]);
+  item.sockets = sockets.slice();
+  item.sockets[index] = null;
+  saveGame();
+  return { ok: true, msg: `The ${gem ? gem.name : "gem"} is prised out and breaks.` };
+}
+
+/* ---------------------------------------------------------------------------
+   FLASKS — one at a time, and it lasts the run rather than the fight.
+   Drinking a second flask replaces the first; dying spills it (handled in the
+   defeat path), as does withdrawing from a realm or the Descent.
+   --------------------------------------------------------------------------- */
+function drinkFlask(id) {
+  const po = potionById(id);
+  if (!po || po.kind !== "flask") return { ok: false, msg: "That is not a flask." };
+  if ((S.potions[id] || 0) < 1) return { ok: false, msg: "You have none of those." };
+  const had = S.flask;
+  if (!takePotion(id, 1)) return { ok: false, msg: "You have none of those." };
+  S.flask = { id: po.id, name: po.name, mods: po.mods };
+  saveGame();
+  return {
+    ok: true,
+    msg: had && had.id !== po.id
+      ? `${po.name} drunk; it displaces your ${had.name}.`
+      : `${po.name} drunk. It will hold until you fall or withdraw.`,
+  };
+}
+
+function clearFlask(reason) {
+  if (!S.flask) return null;
+  const name = S.flask.name;
+  S.flask = null;
+  saveGame();
+  return name;
+}
