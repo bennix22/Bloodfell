@@ -93,6 +93,8 @@ function collectEffects() {
   for (const slot of SLOTS) {
     const item = S.equipment[slot.key];
     if (item && item.proc) add(item.proc.id, item.proc.chance, item.proc.potency || 1);
+    // a trinket's bound property, which no amount of etching can remove
+    if (item && item.boundProc) add(item.boundProc.id, item.boundProc.chance, item.boundProc.potency || 1);
     // a gem may carry a proc of its own, which merges like any other source
     for (const key of (item && item.sockets) || []) {
       const g = key && typeof gemById === "function" ? gemById(key) : null;

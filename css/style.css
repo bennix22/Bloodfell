@@ -1243,3 +1243,14 @@ input[type="range"] { accent-color: var(--brass); }
   padding: 7px 10px; width: 240px;
 }
 .nameinput:focus { outline: none; border-color: var(--brass); }
+.tip-bound {
+  margin-top: 9px; padding: 8px 10px;
+  background: rgba(189,140,69,0.10);
+  border: 1px solid rgba(189,140,69,0.32);
+  border-radius: var(--radius);
+}
+.tip-boundtag {
+  display: inline-block; font-family: var(--mono);
+  font-size: calc(8.5px * var(--fs)); letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--brass); margin-right: 6px;
+}

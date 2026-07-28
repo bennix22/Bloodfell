@@ -9,11 +9,39 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.11.1";
+const VERSION = "1.14.0";
 
 const CHANGELOG = [
   {
-    v: "1.11.1", date: "current",
+    v: "1.14.0", date: "current",
+    title: "1.14.0 \u2014 every late Unique does something",
+    lines: [
+      "The rest of the late Uniques have been rebuilt. THE PALE HANDS turns every point of healing you receive into the same amount of magical damage to the enemy. GUTTER TREAD makes your first blow against an untouched enemy land as a critical strike \u2014 and if it fails to kill, you take that same blow yourself a moment later. THE HOLLOW CROWN removes spell cooldowns entirely and charges 3% of your maximum Health per cast, never the last of it. THE EMPRESS'S VEIL makes the blow after any dodge land for triple.",
+      "The Oblivion Signet was too close to Second Heart, which already saves you from a killing blow. It now carries ERASURE instead: every 10 seconds, half of all the damage you have taken since the last reckoning is undone and given back.",
+      "Nothing above item level 50 is a flat percentage any more \u2014 all eleven do something you can play around.",
+    ],
+  },
+  {
+    v: "1.13.0", date: "",
+    title: "1.13.0 \u2014 rings worth wearing",
+    lines: [
+      "Four late Uniques were flat percentages. They are now rings, and they do something. GRAVETHIRST'S SIGNET marks the enemy as the fight opens and everything rotting in it \u2014 every poison, burn and bleed \u2014 ticks three times faster. THE RED WIDOW'S BAND lays a thread on every critical strike; the fifth closes the web and the enemy takes double damage for four seconds. THE DEVOURING CIRCLE banks every kill and spends them all on your opening blow in the next fight, 8% each, until you fall or leave. THE OBLIVION SIGNET refuses the first blow that would kill you, once per fight, and leaves you standing on almost nothing.",
+      "Erebus now executes: nothing under a fifth of its Health is allowed to keep standing.",
+      "Ring Uniques went from two to five, which was the other half of the problem with rings.",
+      "Hovering a gem at the blacksmith or the gemcrafter now shows what it gives before you set it \u2014 useful, since prising one out later breaks it.",
+      "Loot no longer goes dry when you out-level a realm. Gear never falls more than four levels behind you, though it still never runs more than six levels ahead of whatever dropped it, so a low realm is not an endgame farm.",
+    ],
+  },
+  {
+    v: "1.12.0", date: "",
+    title: "1.12.0 \u2014 rings, trinkets, and a second property",
+    lines: [
+      "Rings and trinkets now drop twice as often. A drop used to pick evenly between the thirteen kinds of gear, but you wear FIFTEEN pieces \u2014 two rings and two trinkets \u2014 so each of those slots was quietly getting half the supply of every other one, and took twice as long to fill. Drops now follow the slots you actually wear.",
+      "Trinkets now carry a second property, worked into the metal. It cannot be etched over, removed, or drawn out as an aspect, so a trinket is always partly what it was found as \u2014 and it is now the one slot where an older piece might still be the right one.",
+    ],
+  },
+  {
+    v: "1.11.1", date: "",
     title: "1.11.1 \u2014 items stop lying about themselves",
     lines: [
       "Fixed: a Unique you already owned kept the description it was created with, so a reworked Pact Iron still claimed to pay for spells with health while actually taking its tithe in mana. Unique descriptions are now refreshed from the game's own definitions every time you load, wherever the item is \u2014 worn, in your bags, or in the bank. Only the words change: rolls, tempering and socketed gems are untouched.",

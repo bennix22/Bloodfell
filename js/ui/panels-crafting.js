@@ -215,7 +215,8 @@ function renderSmithWorkshops() {
     ? owned.map(k => {
         const g = gemById(k);
         if (!g) return "";
-        return `<button class="btn sm" onclick="doSetGem('${sItem.uid}',${emptyIdx},'${k}')">
+        return `<button class="btn sm" data-tip="gem:${k}" onclick="doSetGem('${sItem.uid}',${emptyIdx},'${k}')">
+          <i class="socketdot" style="background:${g.colour}"></i>
           ${g.name} <span class="gemcount">\u00D7${S.gems[k]}</span></button>`;
       }).join("")
     : "";
@@ -352,7 +353,7 @@ function renderGemcrafting() {
         const what = gem.effect
           ? `${gem.effect.chance}% chance of ${effectName(gem.effect)}`
           : Object.keys(gem.mods).map(x => statLine(x, gem.mods[x])).join(", ");
-        return `<div class="gemcard" style="border-left-color:${gem.colour}">
+        return `<div class="gemcard" data-tip="gem:${k}" style="border-left-color:${gem.colour}">
           <div class="gn">${gem.name} <span class="gemcount">\u00D7${S.gems[k]}</span></div>
           <div class="gd">${what}</div></div>`;
       }).join("")}</div>`

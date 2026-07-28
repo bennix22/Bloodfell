@@ -54,6 +54,31 @@ with sync_playwright() as p:
     ok("no flood of requests", after - before <= 1, f"{after - before} requests in 4s (a 5 minute ping means 0)")
     ok("total requests since load is tiny", after <= 3, f"{after} total")
 
+    print("\n=== gem tooltips ===")
+    pg.evaluate("""() => {
+      UI.toggleGuides(true); UI.closeModal();
+      S.level = 60; S.gold = 999999;
+      for (const id in MATERIALS) S.materials[id] = 500;
+      const c = generateItem({ ilvl: 58, rarity: 'epic', slot: 'chest', primary: 'str' });
+      S.inventory.push(c); addSocket(c.uid); equipItem(c.uid);
+      S.gems = { 'ruby:cut': 3, 'bloodstone:cut': 2 };
+      UI.tab.socketUid = S.equipment.chest.uid;
+      UI.go('blacksmith');
+    }""")
+    pg.wait_for_timeout(400)
+    res = pg.evaluate("""() => {
+      const el = document.querySelector('[data-tip^="gem:"]');
+      if (!el) return { found: false };
+      el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true, clientX: 300, clientY: 300 }));
+      return { found: true, display: Tooltip.el.style.display, text: Tooltip.el.innerText || '' };
+    }""")
+    ok("a gem in the tray is hoverable", res.get("found"))
+    ok("hovering a gem shows its card", res.get("display") == "block", "display: " + str(res.get("display")))
+    text = res.get("text", "")
+    ok("the card names the gem", "Ruby" in text, text.split("\n")[0] if text else "")
+    ok("and states what it gives", "Strength" in text, " / ".join(t for t in text.split("\n") if t)[:90])
+    ok("gem keys with a colon survive parsing", "Cut Ruby" in text, "grade was not truncated")
+
     print("\n=== no errors on the page ===")
     ok("no uncaught errors", not errs, "; ".join(errs[:3]))
 

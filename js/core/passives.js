@@ -31,6 +31,16 @@ const DROWNED_DR = 0.30;
 
 /* Pact Iron: the share of maximum Mana each swing takes, and what it pays back. */
 const PACT_IRON_TITHE = 0.06;
+
+/* The Red Widow's web, and the edge of Erebus. */
+const WEB_STACKS = 5;
+const WEB_DURATION = 4;
+const EXECUTE_THRESHOLD = 0.20;
+const DEVOUR_PER_KILL = 0.08;
+const VOIDCALL_BITE = 0.03;     /* share of max health each cast takes */
+const UNSEEN_MULT = 3;          /* the blow after a dodge */
+const ERASE_EVERY = 10;         /* seconds between erasures */
+const ERASE_SHARE = 0.5;        /* how much of the remembered damage is undone */
 const PACT_IRON_BONUS = 1.35;
 
 const PASSIVES = {
@@ -290,30 +300,71 @@ const PASSIVES = {
 
   /* Gravethirst — the first blow of each fight is mostly turned aside. */
   first_wound: {
-    fightStart(C) { C.passiveState.firstWound = true; },
-    damageTaken(C, dmg) {
-      if (C.passiveState.firstWound) { C.passiveState.firstWound = false; return dmg * 0.40; }
-      return dmg;
+    dotSpeed: 3,
+    fightStart(C) {
+      C.passiveState.markedEnemy = true;
+      C.pushLog("A grave-mark settles on your enemy.", "proc");
     },
   },
 
   /* The Pale Physician — stronger healing, gentler blows. */
   palliative: {
-    healTaken(C, amt) { return amt * 1.35; },
-    damageDealt(C, dmg) { return dmg * 0.90; },
+    /* Every heal is answered in kind: the enemy takes what you were given. The
+       guard matters \u2014 the strike can steal life back through lifesteal, which
+       would heal you again and call this hook forever. */
+    healTaken(C, amt) {
+      if (!C.passiveState.transfusing && amt > 0 && C.enemy) {
+        C.passiveState.transfusing = true;
+        C.damageEnemy(amt, "Transfusion", false, "magic");
+        C.passiveState.transfusing = false;
+      }
+      return amt;
+    },
   },
 
   /* Gutterlord Vhask — finishes the wounded. */
   opportunist: {
-    damageDealt(C, dmg) {
-      return C.enemy && C.enemy.hp < C.enemy.maxHp * 0.35 ? dmg * 1.35 : dmg;
+    /* The opening blow on something untouched lands as a critical, and if it
+       fails to finish the job you take that same blow back. The debt is settled
+       on the next tick, by which point the engine knows whether the enemy is
+       still standing. */
+    fightStart(C) { C.passiveState.ambushDone = false; C.passiveState.debt = 0; },
+    damageDealt(C, dmg, ctx) {
+      if (C.passiveState.ambushDone || !ctx || ctx.source !== "auto") return dmg;
+      if (!C.enemy || C.enemy.hp < C.enemy.maxHp) return dmg;
+      C.passiveState.ambushDone = true;
+      const struck = dmg * (1 + (C.stats.critDmg || 50) / 100);
+      C.passiveState.debt = struck;
+      C.pushLog("You open from nowhere.", "crit");
+      return struck;
+    },
+    tick(C) {
+      const owed = C.passiveState.debt || 0;
+      if (!owed) return;
+      C.passiveState.debt = 0;
+      if (C.enemy && C.enemy.hp > 0) {
+        C.pushLog("The ambush is paid for.", "proc");
+        C.applyRawDamage(Math.min(owed, C.player.hp - 1));
+      }
     },
   },
 
   /* The Red Widow — lethal, and fragile. */
   black_widow: {
-    statMods() { return { crit: 25 }; },
-    damageTaken(C, dmg) { return dmg * 1.12; },
+    statMods() { return { crit: 12 }; },
+    fightStart(C) { C.passiveState.web = 0; C.passiveState.webUntil = 0; },
+    damageDealt(C, dmg, ctx) {
+      if (C.fightTime < (C.passiveState.webUntil || 0)) dmg *= 2;
+      if (ctx && ctx.crit) {
+        C.passiveState.web = (C.passiveState.web || 0) + 1;
+        if (C.passiveState.web >= WEB_STACKS) {
+          C.passiveState.web = 0;
+          C.passiveState.webUntil = C.fightTime + WEB_DURATION;
+          C.pushLog("The web closes.", "proc");
+        }
+      }
+      return dmg;
+    },
   },
 
   /* Carrionmaw — the weapon feeds you. */
@@ -323,37 +374,84 @@ const PASSIVES = {
 
   /* The Devourer Below — crits bite deeper. */
   devour: {
-    damageDealt(C, dmg, ctx) { return ctx && ctx.crit ? dmg * 1.30 : dmg; },
+    fightStart(C) {
+      C.passiveState.devourReady = (S.devourStacks || 0);
+      C.passiveState.devourSpent = false;
+    },
+    onKill() { S.devourStacks = (S.devourStacks || 0) + 1; },
+    damageDealt(C, dmg, ctx) {
+      if (!ctx || ctx.source !== "auto" || C.passiveState.devourSpent) return dmg;
+      C.passiveState.devourSpent = true;
+      const stacks = C.passiveState.devourReady || 0;
+      if (!stacks) return dmg;
+      C.pushLog(`The circle gives back ${stacks} ${stacks === 1 ? "kill" : "kills"}.`, "proc");
+      return dmg * (1 + DEVOUR_PER_KILL * stacks);
+    },
   },
 
   /* Nihiloth — a caster's bargain: spells hit harder, swings weaker. */
   voidcall: {
-    damageDealt(C, dmg, ctx) {
-      if (!ctx) return dmg;
-      if (ctx.source === "spell") return dmg * 1.25;
-      if (ctx.source === "auto") return dmg * 0.80;
-      return dmg;
+    /* Spells come off cooldown the instant they are cast, and each one takes a
+       piece of you. It can never be the thing that kills you \u2014 the cost stops
+       at one health, and at that point you simply cannot afford to cast. */
+    cooldown() { return 0; },
+    onCast(C) {
+      const bite = Math.min(C.stats.maxHp * VOIDCALL_BITE, C.player.hp - 1);
+      if (bite > 0) C.applyRawDamage(bite, "The void takes its share.");
     },
   },
 
   /* The Blind Empress — unseen and untouched. */
   unseen: {
-    statMods() { return { dodge: 18, crit: 12 }; },
+    /* Dodging leaves the enemy swinging at nothing, and whatever you do next
+       lands on something that cannot see you coming. */
+    statMods() { return { dodge: 14 }; },
+    fightStart(C) { C.passiveState.unseenReady = false; },
+    onDodge(C) {
+      C.passiveState.unseenReady = true;
+      C.pushLog("You are not where it struck.", "proc");
+    },
+    damageDealt(C, dmg, ctx) {
+      if (!C.passiveState.unseenReady || !ctx || ctx.source !== "auto") return dmg;
+      C.passiveState.unseenReady = false;
+      C.pushLog("Unseen.", "crit");
+      return dmg * UNSEEN_MULT;
+    },
   },
 
   /* Warden of Oblivion — a wall while whole, paper once hurt. */
   oblivion_ward: {
+    /* Oblivion does not block a blow \u2014 it decides, periodically, that some of
+       what happened did not. Damage taken is remembered, and every few seconds
+       half of it is simply undone. Deliberately NOT a death save: Second Heart
+       already owns that. */
+    fightStart(C) { C.passiveState.erased = 0; C.passiveState.eraseAt = ERASE_EVERY; },
     damageTaken(C, dmg) {
-      return C.player.hp > C.stats.maxHp * 0.60 ? dmg * 0.65 : dmg;
+      C.passiveState.erased = (C.passiveState.erased || 0) + dmg;
+      return dmg;
+    },
+    tick(C) {
+      if (C.fightTime < (C.passiveState.eraseAt || 0)) return;
+      C.passiveState.eraseAt = C.fightTime + ERASE_EVERY;
+      const undo = (C.passiveState.erased || 0) * ERASE_SHARE;
+      C.passiveState.erased = 0;
+      if (undo > 0) {
+        C.healPlayer(undo, "Erasure");
+        C.pushLog("Some of that is decided against.", "proc");
+      }
     },
   },
 
   /* Erebus — the killing edge grows as the enemy fails. */
   the_last_dark: {
     damageDealt(C, dmg) {
-      if (!C.enemy || !C.enemy.maxHp) return dmg;
-      const missing = 1 - C.enemy.hp / C.enemy.maxHp;
-      return dmg * (1 + 0.50 * missing);
+      const e = C.enemy;
+      if (!e || !e.maxHp) return dmg;
+      if (e.hp <= e.maxHp * EXECUTE_THRESHOLD) {
+        C.pushLog("The last dark takes it.", "proc");
+        return Math.max(dmg, e.hp + 1);
+      }
+      return dmg;
     },
   },
 };

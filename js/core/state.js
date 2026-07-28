@@ -56,6 +56,9 @@ function freshSave() {
 
     equipment: eq,
     inventory: [],
+    /* Kills banked by a Devouring Circle, spent on the next opening blow. */
+    devourStacks: 0,
+
     /* Loose gems, counted by "type:grade" the way materials are counted. */
     gems: {},
     /* Uncut stones from realms and raids, keyed "colour:grade". */

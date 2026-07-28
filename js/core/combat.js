@@ -340,7 +340,7 @@ const Combat = {
     // damage over time on the enemy
     for (let i = e.dots.length - 1; i >= 0; i--) {
       const d = e.dots[i];
-      d.timer -= TICK;
+      d.timer -= TICK * this.dotSpeed();
       if (d.timer <= 0) {
         d.timer += d.interval;
         this.damageEnemy(d.perTick, d.name, false, d.school);
@@ -399,12 +399,12 @@ const Combat = {
     return v;
   },
 
-  passiveNotify(hook) {
+  passiveNotify(hook, arg) {
     const ps = this.stats.passives;
     if (!ps || !ps.length) return false;
     let any = false;
     for (const p of ps) {
-      if (p.def[hook] && p.def[hook](this)) any = true;
+      if (p.def[hook] && p.def[hook](this, arg)) any = true;
     }
     return any;
   },
@@ -554,6 +554,7 @@ const Combat = {
 
     if (Math.random() * 100 < st.dodge) {
       this.pushLog(`You dodge ${e.rawName}.`, "miss");
+      this.passiveNotify("onDodge");
       return;
     }
 
@@ -678,6 +679,7 @@ const Combat = {
       p.mana -= this.spellCost(sp);
     }
     p.cds[sp.id] = this.passiveTransform("cooldown", sp.cd * (1 - st.cdr / 100));
+    this.passiveNotify("onCast", sp);
     p.gcd = Math.max(GCD_FLOOR, GCD_BASE / (1 + st.haste / 100));
     Sound.play("spell", 120);
 
@@ -751,6 +753,19 @@ const Combat = {
       return this.player.hp > this.castHealthCost(sp) + 1;
     }
     return this.player.mana >= this.spellCost(sp);
+  },
+
+  /* How fast damage over time ticks. Normally once per its own interval; a
+     passive may make the clock run faster. Read fresh each tick so a mark that
+     lands mid-fight takes effect immediately. */
+  dotSpeed() {
+    let mult = 1;
+    for (const p of this.stats.passives || []) {
+      if (typeof p.def.dotSpeed === "number" && this.passiveState.markedEnemy) {
+        mult = Math.max(mult, p.def.dotSpeed);
+      }
+    }
+    return mult;
   },
 
   spellPower(sp) {
@@ -921,6 +936,7 @@ const Combat = {
   lose() {
     this.active = false;
     S.tally.deaths++;
+    S.devourStacks = 0;          // a devouring ring loses what it has eaten
     // a flask does not survive a defeat
     if (S.flask) {
       this.pushLog(`Your ${S.flask.name} is spilled.`, "potion");
@@ -1086,6 +1102,7 @@ function currentVitals() {
 /* Walking away. Costs the run, restores the character. */
 function retreatFromRun() {
   const depth = S.run.depth;
+  S.devourStacks = 0;
   // a flask holds for a run, and withdrawing ends the run
   if (typeof clearFlask === "function") clearFlask("retreat");
   beginRun(null);

@@ -43,6 +43,46 @@ const TWO_HAND_STAT_BONUS = 1.45;
 const ASPECT_MIN_ILVL = 40;
 
 function itemBudget(ilvl) { return 6 + 0.72 * Math.pow(ilvl, 1.38); }
+
+/* A trinket's bound property is a little weaker than its rolled one, so the
+   second effect is a bonus rather than a reason trinkets outclass every other
+   slot. */
+const BOUND_PROC_SCALE = 0.7;
+
+/* Which slot a random drop is for.
+   Weighted by how many of that slot you WEAR, not by how many slot types exist.
+   There are thirteen types but fifteen worn slots, because rings and trinkets
+   are worn in pairs \u2014 so an even split handed each ring slot half the supply
+   of a helm slot, and filling both took twice as long. Weighting by worn count
+   makes a ring exactly as likely per SLOT as a helm. */
+const DROP_SLOT_POOL = (function () {
+  const pool = [];
+  for (const s of SLOTS) {
+    const t = s.type || s.key;
+    if (SLOT_TYPES.includes(t)) pool.push(t);
+  }
+  return pool;
+})();
+
+function pickDropSlot() { return pick(DROP_SLOT_POOL); }
+
+/* What item level a kill in a realm should hand over.
+   Ordinarily it tracks the enemy, which tracks the realm. But later realms are
+   gated behind raid bosses, so a player who cannot yet get past one keeps
+   farming a realm well below their level and every drop arrives stale \u2014 the
+   dry stretch. Gear therefore never falls more than DROP_LAG levels behind YOU,
+   while still never running more than DROP_LEAD ahead of the enemy that dropped
+   it, so out-levelling a realm stops being a punishment without turning a low
+   realm into an endgame farm. */
+const DROP_LAG = 4;
+const DROP_LEAD = 6;
+
+function dropIlvl(enemyLevel) {
+  const rolled = enemyLevel + randInt(-2, 2);
+  const floor = Math.max(1, (S.level || 1) - DROP_LAG);
+  const ceiling = enemyLevel + DROP_LEAD;
+  return Math.max(1, Math.min(Math.max(rolled, floor), ceiling));
+}
 function weaponDps(ilvl) { return 4 + 1.53 * Math.pow(ilvl, 1.38); }
 function armorBase(ilvl) { return 8 + 1.60 * Math.pow(ilvl, 1.30); }
 
@@ -62,7 +102,7 @@ function generateItem(opts) {
   const o = opts || {};
   const ilvl = Math.max(1, Math.round(o.ilvl || 1));
   const rarity = o.rarity || rollRarity(0);
-  const slot = o.slot || pick(SLOT_TYPES);
+  const slot = o.slot || pickDropSlot();
   const primary = o.primary || pick(["str", "agi", "int"]);
   const R = RARITIES[rarity];
   const tier = tierForIlvl(ilvl);
@@ -161,6 +201,25 @@ function generateItem(opts) {
       potency: Math.round(rand(procTier.potency[0], procTier.potency[1]) * 100) / 100,
     };
   }
+  /* A trinket carries a SECOND property, bound into the metal: it cannot be
+     etched over, removed, or extracted, so a trinket is always partly what it
+     was found as. This is what makes trinkets worth reading rather than
+     comparing on stats alone \u2014 and it is the reason they are the one slot you
+     might keep an older piece in. Bound properties start at the same item level
+     as ordinary ones. */
+  if (slot === "trinket" && ilvl >= ASPECT_MIN_ILVL) {
+    const tier = PROC_TIERS[rarity] || PROC_TIERS.epic;
+    const pool = PROC_POOL[primary] || PROC_POOL.str;
+    let id = pick(pool);
+    // never the same property twice on one trinket
+    for (let i = 0; i < 6 && item.proc && id === item.proc.id; i++) id = pick(pool);
+    item.boundProc = {
+      id,
+      chance: Math.round(rand(tier.chance[0], tier.chance[1]) * BOUND_PROC_SCALE),
+      potency: Math.round(rand(tier.potency[0], tier.potency[1]) * BOUND_PROC_SCALE * 100) / 100,
+    };
+  }
+
   if (slot === "offhand" && primary === "str") {
     stats.block = (stats.block || 0) + Math.round((2 + ilvl * 0.09) * 10) / 10;
     stats.armor = Math.round(armorBase(ilvl) * 1.15 * (0.9 + R.budget * 0.3));
@@ -346,7 +405,7 @@ function rollRealmLoot(realm, enemyLevel, lootMod, magicFind) {
   const gearChance = 0.17 * mod * (1 + (magicFind || 0) / 100);
   if (Math.random() < gearChance) {
     out.items.push(generateItem({
-      ilvl: Math.max(1, enemyLevel + randInt(-2, 2)),
+      ilvl: dropIlvl(enemyLevel),
       rarity: rollRarity((magicFind || 0) + (mod - 1) * 40),
     }));
   }

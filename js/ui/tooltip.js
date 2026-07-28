@@ -70,12 +70,23 @@ const Tooltip = {
 
   openFrom(host, x, y) {
     const spec = host.dataset.tip || "";
-    const [kind, key] = spec.split(":");
+    // only the FIRST colon separates kind from key: a gem key is "type:grade",
+    // so splitting on every colon would hand us "ruby" instead of "ruby:cut"
+    const cut = spec.indexOf(":");
+    const kind = cut < 0 ? spec : spec.slice(0, cut);
+    const key = cut < 0 ? "" : spec.slice(cut + 1);
     let item = null, compare = null;
 
     if (kind === "inv") {
       item = S.inventory.find(i => i.uid === key);
       if (item) compare = bestWornFor(item);
+    } else if (kind === "gem") {
+      // a gem in the blacksmith's tray or on the bench: show what it would add
+      // before you commit, since prising it out later breaks it
+      const g = typeof gemById === "function" ? gemById(key) : null;
+      if (!g) { this.hide(); return; }
+      this.current = { plain: gemCard(g) };
+      this.redraw(); this.place(x, y); return;
     } else if (kind === "bank") {
       item = (S.bank || []).find(i => i.uid === key);
       if (item) compare = bestWornFor(item);
@@ -223,6 +234,13 @@ function tipCard(item, against, muted) {
     : item.proc
     ? `<div class="tip-proc"><b>${effectName(item.proc)}</b> \u2014 ${describeEffect(item.proc)}</div>` : "";
 
+  const boundLine = item.boundProc
+    ? `<div class="tip-bound">
+         <span class="tip-boundtag">Bound</span>
+         <b>${effectName(item.boundProc)}</b> \u2014 ${describeEffect(item.boundProc)}
+         <div class="tip-aspectnote">worked into the metal \u2014 cannot be etched over or drawn out</div>
+       </div>` : "";
+
   // sockets, and what is sitting in them
   const socketLine = (item.sockets && item.sockets.length)
     ? `<div class="socketrow">${item.sockets.map(k => {
@@ -248,6 +266,7 @@ function tipCard(item, against, muted) {
     ${handsLine}
     ${statRows ? `<div class="tip-block">${statRows}${missing}</div>` : ""}
     ${procLine}
+    ${boundLine}
     ${socketLine}
     ${passiveLine}
     ${ench ? `<div class="tip-ench">\u2727 ${ench.name}</div>` : ""}
@@ -344,6 +363,21 @@ function spellCard(id) {
 /* The set block on an item tooltip. Lists every piece, marks the ones you are
    wearing, and lights the bonus tiers you have reached — the same shape an MMO
    uses, because it answers "what am I still missing" at a glance. */
+/* What a gem would give, read before it goes in \u2014 prising it out later breaks
+   it, so the decision wants to be an informed one. */
+function gemCard(g) {
+  const lines = g.effect
+    ? `<div class="tip-proc"><b>${effectName(g.effect)}</b> \u2014 ${describeEffect(g.effect)}</div>`
+    : Object.keys(g.mods).map(k =>
+        `<div class="tip-stat"><b>${statLine(k, g.mods[k])}</b></div>`).join("");
+  return `<div class="tip-card r-border-epic">
+    <div class="tip-name" style="color:${g.colour}">${g.name}</div>
+    <div class="tip-sub">${GEM_GRADES[g.grade].name} gem \u00B7 ${g.shade} \u00B7 ${g.stat}</div>
+    <div class="tip-block">${lines}</div>
+    <div class="tip-foot">held: ${fmt(S.gems[g.key] || 0)} \u00B7 prising it out later breaks it</div>
+  </div>`;
+}
+
 function setTooltipBlock(setId) {
   const set = setById(setId);
   if (!set) return "";
