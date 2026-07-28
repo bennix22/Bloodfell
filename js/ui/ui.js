@@ -25,6 +25,7 @@ const UI = {
           </div>
           <div class="charcard" id="charcard"></div>
           <nav class="nav" id="nav"></nav>
+          ${typeof Counter !== "undefined" ? Counter.html() : ""}
           <div class="railfoot">
             <button class="btn sm" onclick="UI.openChangelog()" id="changelogbtn">What's new</button>
             <button class="btn sm" onclick="UI.openSave()">Save file</button>

@@ -125,6 +125,10 @@ function frame(now) {
     saveGame();
   }
 
+  // only in a real browser: harnesses have no fetch, and starting an interval
+  // there would leave a timer running after the tests finish
+  if (typeof fetch === "function" && typeof Counter !== "undefined") Counter.start();
+
   requestAnimationFrame(frame);
 }
 
@@ -143,6 +147,10 @@ function boot() {
     saveGame();
     UI.toast("A new character, armed and pointed at Ashen Hollow.", "good");
   }
+  // only in a real browser: harnesses have no fetch, and starting an interval
+  // there would leave a timer running after the tests finish
+  if (typeof fetch === "function" && typeof Counter !== "undefined") Counter.start();
+
   requestAnimationFrame(frame);
 }
 

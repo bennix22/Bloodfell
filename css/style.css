@@ -1226,3 +1226,14 @@ input[type="range"] { accent-color: var(--brass); }
   font-family: var(--mono); font-size: calc(9.5px * var(--fs)); letter-spacing: 0.1em;
   text-transform: uppercase; color: var(--dim); margin-left: 6px;
 }
+
+/* ---- global counter in the rail ---- */
+.globalcounter, #globalcounter { padding: 0 14px 10px; }
+#globalcounter:empty { display: none; }
+.gc-line {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  font-size: calc(11.5px * var(--fs)); color: var(--ash);
+  padding: 3px 0; border-top: 1px solid var(--edge);
+}
+.gc-line b { font-family: var(--mono); color: var(--bone); font-weight: normal; }
+.gc-line b i { color: var(--brass); font-style: normal; }

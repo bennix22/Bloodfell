@@ -597,6 +597,20 @@ function renderSettings() {
     </div>
 
     <div class="panel">
+      <h3>Global counter</h3>
+      <div class="ctrlbar">
+        <label class="switch">
+          <input type="checkbox" ${S.settings.globalCounter !== false ? "checked" : ""}
+                 onchange="Counter.setEnabled(this.checked)">
+          Show how many people are playing
+        </label>
+      </div>
+      <p style="margin-top:8px">Sends a random id and your deepest Descent floor, once every five
+         minutes. That is the entire payload \u2014 no name, nothing that identifies you. With this off
+         nothing leaves this machine at all, and the game plays exactly the same either way.</p>
+    </div>
+
+    <div class="panel">
       <h3>Sound</h3>
       <div class="ctrlbar">
         <label class="switch">

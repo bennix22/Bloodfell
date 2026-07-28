@@ -9,11 +9,20 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.8.5";
+const VERSION = "1.9.0";
 
 const CHANGELOG = [
   {
-    v: "1.8.5", date: "current",
+    v: "1.9.0", date: "current",
+    title: "1.9.0 \u2014 you are not alone down here",
+    lines: [
+      "The sidebar now shows how many people are playing Bloodfell right now, and the deepest Descent floor anyone has reached.",
+      "It checks in once every five minutes and sends exactly two things: a random id made up on this machine, and your deepest floor. No name, no account, no address, nothing that identifies a person. You can turn the whole thing off in Settings, and with it off nothing leaves your machine at all.",
+      "If you are offline, or the counter is unreachable, the game behaves exactly as it always has \u2014 the panel simply does not appear. The downloadable single-file version is unaffected.",
+    ],
+  },
+  {
+    v: "1.8.5", date: "",
     title: "1.8.5 — the bank counts",
     lines: [
       "Uniques kept in the bank now show as found on the Uniques page, and each entry says where it is \u2014 worn, in your bags, or in your bank.",
