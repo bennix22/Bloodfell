@@ -9,11 +9,18 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.11.0";
+const VERSION = "1.11.1";
 
 const CHANGELOG = [
   {
-    v: "1.11.0", date: "current",
+    v: "1.11.1", date: "current",
+    title: "1.11.1 \u2014 items stop lying about themselves",
+    lines: [
+      "Fixed: a Unique you already owned kept the description it was created with, so a reworked Pact Iron still claimed to pay for spells with health while actually taking its tithe in mana. Unique descriptions are now refreshed from the game's own definitions every time you load, wherever the item is \u2014 worn, in your bags, or in the bank. Only the words change: rolls, tempering and socketed gems are untouched.",
+    ],
+  },
+  {
+    v: "1.11.0", date: "",
     title: "1.11.0 \u2014 Pact Iron finds its own bargain",
     lines: [
       "Pact Iron and The Blood Pact were the same item twice \u2014 both made spells cost health, from bosses one apart in the same raid, with Pact Iron simply cheaper. The Blood Pact keeps that bargain. Pact Iron now has its own, and the opposite one: every swing takes 6% of your maximum Mana and strikes 35% harder for it. Run the pool dry and it is only iron until you recover. A Strength weapon that suddenly cares what your Mana is doing.",

@@ -244,6 +244,26 @@ function remapGems(save) {
   for (const k in save.equipment || {}) fixSockets(save.equipment[k]);
 }
 
+/* A Unique copies its passive's name and text onto the item when it drops, so an
+   item in an old save still shows the wording it was created with. When a passive
+   is reworded \u2014 or reworked, as Pact Iron was \u2014 that copy becomes a lie: the
+   item behaves by its passive ID, which is shared, but describes itself from a
+   stale snapshot. Refresh the description of every Unique on load, wherever it is
+   sitting. Only the words change; the item, its stats and its rolls are untouched. */
+function refreshUniqueText(save) {
+  if (typeof uniqueById !== "function") return;
+  const fix = it => {
+    if (!it || !it.uniqueId || !it.passive) return;
+    const def = uniqueById(it.uniqueId);
+    if (!def || !def.passive) return;
+    it.passive = { id: def.passive.id, name: def.passive.name, text: def.passive.text };
+    it.flavour = def.flavour;
+  };
+  (save.inventory || []).forEach(fix);
+  (save.bank || []).forEach(fix);
+  for (const k in save.equipment || {}) fix(save.equipment[k]);
+}
+
 function migrate(save) {
   const base = freshSave();
   const out = Object.assign(base, save);
@@ -259,6 +279,7 @@ function migrate(save) {
   if (!out.vitals) out.vitals = { hp: null, mana: null };
   sanitizeTalents(out);
   retagSetPieces(out);
+  refreshUniqueText(out);
   if (!Array.isArray(out.bank)) out.bank = [];   // saves from before the bank existed
   if (!out.gems || typeof out.gems !== "object") out.gems = {};   // before gems existed
   if (!out.roughGems || typeof out.roughGems !== "object") out.roughGems = {};
