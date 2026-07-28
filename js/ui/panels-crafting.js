@@ -382,6 +382,21 @@ function renderGemcrafting() {
 
 function doCutGem(id, grade, n) { Sound.play("craft", 0); UI.say(cutGem(id, grade, n)); }
 
+/* Names your character. Stripped of anything that could break markup, since it
+   is shown in your own UI and, if the global counter is on, next to the deepest
+   floor record. Returns false if there was nothing usable in the input, which is
+   how the opening prompt knows to keep asking. */
+function setPlayerName(v) {
+  const clean = String(v || "").replace(/[<>&"'\\]/g, "").trim().slice(0, 24);
+  if (!clean) return false;
+  S.name = clean;
+  saveGame();
+  UI.render();
+  UI.renderCharCard();
+  if (typeof Counter !== "undefined") Counter.ping();   // claim the record under the new name
+  return true;
+}
+
 /* --------------------------------------------------------------- alchemy */
 function renderAlchemy() {
   const groups = [
@@ -597,6 +612,18 @@ function renderSettings() {
     </div>
 
     <div class="panel">
+      <h3>Character name</h3>
+      <div class="ctrlbar">
+        <input type="text" maxlength="24" class="nameinput" placeholder="Nameless"
+               value="${S.name === "Nameless" ? "" : S.name}"
+               onchange="if(!setPlayerName(this.value)) UI.toast('A name, if you please.', 'bad')">
+      </div>
+      <p style="margin-top:8px">Shown on your character sheet and in the fight log. If the global
+         counter is on, this is the name that sits beside the deepest floor of the Descent, should
+         you be the one who reached it.</p>
+    </div>
+
+    <div class="panel">
       <h3>Global counter</h3>
       <div class="ctrlbar">
         <label class="switch">
@@ -605,9 +632,9 @@ function renderSettings() {
           Show how many people are playing
         </label>
       </div>
-      <p style="margin-top:8px">Sends a random id and your deepest Descent floor, once every five
-         minutes. That is the entire payload \u2014 no name, nothing that identifies you. With this off
-         nothing leaves this machine at all, and the game plays exactly the same either way.</p>
+      <p style="margin-top:8px">Sends a random id, your character name, and your deepest Descent
+         floor, once every five minutes. That is the entire payload. With this off nothing leaves
+         this machine at all, and the game plays exactly the same either way.</p>
     </div>
 
     <div class="panel">

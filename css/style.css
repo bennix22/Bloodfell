@@ -1237,3 +1237,9 @@ input[type="range"] { accent-color: var(--brass); }
 }
 .gc-line b { font-family: var(--mono); color: var(--bone); font-weight: normal; }
 .gc-line b i { color: var(--brass); font-style: normal; }
+.nameinput {
+  background: var(--pitch); border: 1px solid var(--edge-hi); border-radius: var(--radius);
+  color: var(--bone); font-family: var(--serif); font-size: calc(13.5px * var(--fs));
+  padding: 7px 10px; width: 240px;
+}
+.nameinput:focus { outline: none; border-color: var(--brass); }

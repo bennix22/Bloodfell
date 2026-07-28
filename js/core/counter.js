@@ -9,8 +9,8 @@
    the Worker inside Cloudflare's free write allowance \u2014 see the Worker source.
 
    What leaves this machine: a random id generated once and kept in the save,
-   and your deepest Descent floor. That is the whole payload. No name, no
-   account, no address, nothing that identifies a person.
+   the character name you chose, and your deepest Descent floor. That is the
+   whole payload. No account, no address, nothing but what you typed.
    =========================================================================== */
 
 /* The deployed Worker. Empty string disables the whole feature. */
@@ -38,8 +38,11 @@ const Counter = {
     return S.counterId;
   },
 
+  /* Idempotent on purpose. If this is ever called from somewhere that repeats
+     — a frame loop, a re-render — it must not open a second request. Ask for
+     a restart explicitly with stop() first. */
   start() {
-    this.stop();
+    if (this.timer) return;
     if (!this.enabled()) return;
     this.ping();
     this.timer = setInterval(() => this.ping(), COUNTER_PING_MS);
@@ -55,10 +58,14 @@ const Counter = {
     try {
       const res = await fetch(COUNTER_URL, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        // text/plain keeps this a "simple" request, so the browser skips the
+        // CORS preflight and one ping costs one request instead of two. The
+        // Worker parses the body as JSON regardless of what this says.
+        headers: { "Content-Type": "text/plain" },
         body: JSON.stringify({
           id: this.id(),
           floor: (S.descent && S.descent.best) || 0,
+          name: S.name && S.name !== "Nameless" ? S.name : "",
         }),
       });
       if (!res.ok) return;
@@ -82,10 +89,11 @@ const Counter = {
   },
 
   body() {
-    const floor = (this.deepest && this.deepest.floor) || 0;
+    const d = this.deepest || { floor: 0, name: "" };
     return `
       <div class="gc-line"><span>Playing now</span><b>${fmt(this.online)}</b></div>
-      ${floor ? `<div class="gc-line"><span>Deepest floor</span><b>${fmt(floor)}</b></div>` : ""}`;
+      ${d.floor ? `<div class="gc-line"><span>Deepest floor</span>
+        <b>${fmt(d.floor)}${d.name ? ` <i>${d.name}</i>` : ""}</b></div>` : ""}`;
   },
 
   /* Updates in place between renders. */

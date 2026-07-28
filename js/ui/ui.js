@@ -23,9 +23,9 @@ const UI = {
           <div class="brand">
             ${typeof BRAND_LOGO !== "undefined" ? BRAND_LOGO : `<h1>Bloodfell</h1><div class="sub">the ground drinks deep</div>`}
           </div>
+          ${typeof Counter !== "undefined" ? Counter.html() : ""}
           <div class="charcard" id="charcard"></div>
           <nav class="nav" id="nav"></nav>
-          ${typeof Counter !== "undefined" ? Counter.html() : ""}
           <div class="railfoot">
             <button class="btn sm" onclick="UI.openChangelog()" id="changelogbtn">What's new</button>
             <button class="btn sm" onclick="UI.openSave()">Save file</button>
@@ -200,6 +200,11 @@ const UI = {
     this.el.modalhost.innerHTML = `<div class="scrim" onclick="if(event.target===this)UI.closeModal()">
       <div class="modal">${html}</div></div>`;
   },
+  /* A modal with no way out: no close button, and a backdrop that ignores
+     clicks. Used only for the naming prompt, which has to be answered. */
+  openModalLocked(html) {
+    this.el.modalhost.innerHTML = `<div class="scrim"><div class="modal">${html}</div></div>`;
+  },
   closeModal() { this.el.modalhost.innerHTML = ""; },
 
   openChangelog() {
@@ -252,6 +257,44 @@ const UI = {
     } catch (e) {
       this.toast("That does not look like a valid save.", "bad");
     }
+  },
+
+  /* Asked once, on load, of anyone who has never set a name \u2014 including saves
+     made before names existed. It ONLY writes S.name: level, gear, materials
+     and every unlock are untouched, so an existing character loses nothing by
+     answering it. There is no dismiss button, but closing it costs nothing
+     either: the question simply comes back next time the game loads. */
+  promptForName() {
+    // if it is already up, leave it alone: rebuilding it would destroy the text
+    // field the player is in the middle of typing into
+    if (document.getElementById("nameprompt")) return;
+    this.openModalLocked(`
+      <h3>What are you called?</h3>
+      <p style="color:var(--ash)">Bloodfell now keeps a record of the deepest floor of the Descent
+         anyone has reached, and the name beside it. Yours shows on your character sheet and in the
+         fight log either way.</p>
+      <p style="color:var(--ash)">Your character, gear and progress are untouched by this \u2014 it is
+         only a name.</p>
+      <div class="ctrlbar" style="margin-top:12px">
+        <input type="text" id="nameprompt" class="nameinput" maxlength="24" placeholder="Name your character"
+               onkeydown="if(event.key==='Enter')UI.submitName()">
+      </div>
+      <div class="modalfoot">
+        <button class="btn primary" onclick="UI.submitName()">That is my name</button>
+      </div>`);
+    const input = document.getElementById("nameprompt");
+    if (input) input.focus();
+  },
+
+  submitName() {
+    const input = document.getElementById("nameprompt");
+    const raw = input ? input.value : "";
+    if (!setPlayerName(raw)) {
+      this.toast("A name, if you please.", "bad");
+      return;
+    }
+    this.closeModal();
+    this.toast(`Well met, ${S.name}.`, "good");
   },
 
   confirmWipe() {

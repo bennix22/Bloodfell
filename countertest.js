@@ -44,8 +44,7 @@ console.log('\n=== 3. the worker answers ===');
     W.eval('UI.render()');
     const rail = W.document.querySelector('.rail').innerHTML;
     ok('rail shows the numbers', /Playing now/.test(rail) && />3</.test(rail), 'rendered');
-    ok('rail shows the record', /Deepest floor/.test(rail) && /61/.test(rail));
-    ok('rail shows no name', !/Ben/.test(rail));
+    ok('rail shows the record with its holder', /Deepest floor/.test(rail) && /61/.test(rail) && /Ben/.test(rail));
     ok('survives a re-render', (function(){ W.eval('UI.render()'); return /Playing now/.test(W.document.querySelector('.rail').innerHTML); })());
 
     // what actually gets sent
@@ -54,8 +53,7 @@ console.log('\n=== 3. the worker answers ===');
     W2.eval("S.name='Ben'; S.descent.best=44; saveGame();");
     await W2.eval('Counter.ping()');
     ok('posts to the worker', /workers\.dev/.test(sent.url), sent.url);
-    ok('sends only id and floor', Object.keys(sent.body).sort().join(',') === 'floor,id', Object.keys(sent.body).join(','));
-    ok('no name in the payload', !('name' in sent.body));
+    ok('sends id, floor and name', Object.keys(sent.body).sort().join(',') === 'floor,id,name', Object.keys(sent.body).join(','));
     ok('sends the deepest floor', sent.body.floor === 44);
     ok('id is random', /^[a-z0-9]{8,}$/i.test(sent.body.id), sent.body.id);
 

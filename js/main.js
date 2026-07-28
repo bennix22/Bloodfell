@@ -125,10 +125,6 @@ function frame(now) {
     saveGame();
   }
 
-  // only in a real browser: harnesses have no fetch, and starting an interval
-  // there would leave a timer running after the tests finish
-  if (typeof fetch === "function" && typeof Counter !== "undefined") Counter.start();
-
   requestAnimationFrame(frame);
 }
 
@@ -147,9 +143,14 @@ function boot() {
     saveGame();
     UI.toast("A new character, armed and pointed at Ashen Hollow.", "good");
   }
-  // only in a real browser: harnesses have no fetch, and starting an interval
-  // there would leave a timer running after the tests finish
+
+  /* ONCE, at boot — never from frame(). Both of these are expensive to repeat:
+     start() fires a network request, and promptForName() rebuilds a modal that
+     contains a text field, which makes the field impossible to type into. The
+     guards inside them make a second call harmless, but the right place for
+     them is here. */
   if (typeof fetch === "function" && typeof Counter !== "undefined") Counter.start();
+  if (!S.name || S.name === "Nameless") UI.promptForName();
 
   requestAnimationFrame(frame);
 }

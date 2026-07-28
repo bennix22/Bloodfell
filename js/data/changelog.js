@@ -9,11 +9,28 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.9.0";
+const VERSION = "1.10.1";
 
 const CHANGELOG = [
   {
-    v: "1.9.0", date: "current",
+    v: "1.10.1", date: "current",
+    title: "1.10.1 \u2014 the name box works",
+    lines: [
+      "Fixed: you could not type into the naming prompt. It was being rebuilt sixty times a second, so every keystroke landed in a box that had already been thrown away.",
+      "The same mistake also had the global counter checking in about sixty times a SECOND instead of once every five minutes, since 1.9.0. That is fixed too, and one check-in now costs a single request rather than two.",
+    ],
+  },
+  {
+    v: "1.10.0", date: "",
+    title: "1.10.0 \u2014 name yourself",
+    lines: [
+      "Characters have names now. If yours does not, the game asks for one the next time you open it \u2014 that prompt only writes a name. Your level, gear, gold, materials, talents, boss kills and Descent record are all untouched by answering it, and you can change the name later in Settings.",
+      "The deepest Descent floor on the global counter now carries the name of whoever reached it.",
+      "The counter has moved to the top of the sidebar, directly under the logo.",
+    ],
+  },
+  {
+    v: "1.9.0", date: "",
     title: "1.9.0 \u2014 you are not alone down here",
     lines: [
       "The sidebar now shows how many people are playing Bloodfell right now, and the deepest Descent floor anyone has reached.",
