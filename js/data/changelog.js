@@ -9,11 +9,27 @@
    yet puts a mark on the button. Newest entry first.
    =========================================================================== */
 
-const VERSION = "1.10.1";
+const VERSION = "1.11.0";
 
 const CHANGELOG = [
   {
-    v: "1.10.1", date: "current",
+    v: "1.11.0", date: "current",
+    title: "1.11.0 \u2014 Pact Iron finds its own bargain",
+    lines: [
+      "Pact Iron and The Blood Pact were the same item twice \u2014 both made spells cost health, from bosses one apart in the same raid, with Pact Iron simply cheaper. The Blood Pact keeps that bargain. Pact Iron now has its own, and the opposite one: every swing takes 6% of your maximum Mana and strikes 35% harder for it. Run the pool dry and it is only iron until you recover. A Strength weapon that suddenly cares what your Mana is doing.",
+      "The global counter now retries shortly after a failed check-in instead of waiting the full five minutes, and it will not show numbers when the counter admits it could not read them \u2014 an empty panel is more honest than a confident zero.",
+    ],
+  },
+  {
+    v: "1.10.2", date: "",
+    title: "1.10.2 \u2014 Pact Iron no longer kills you",
+    lines: [
+      "Fixed: equipping Pact Iron killed you within a second of a fight starting. It charged its health cost from the code that answers \u201Chow much would this spell cost?\u201D \u2014 a question the engine asks several times a second for every spell in your rotation \u2014 so the bill piled up before you had cast anything at all.",
+      "It now pays for spells the same way the game's other blood-price item does, at its own cheaper rate: a spell that would cost a tenth of your Mana takes a twentieth of your Health. A cast can never be the thing that kills you \u2014 if you cannot afford it, it does not fire.",
+    ],
+  },
+  {
+    v: "1.10.1", date: "",
     title: "1.10.1 \u2014 the name box works",
     lines: [
       "Fixed: you could not type into the naming prompt. It was being rebuilt sixty times a second, so every keystroke landed in a box that had already been thrown away.",

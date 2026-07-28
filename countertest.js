@@ -67,6 +67,14 @@ console.log('\n=== 3. the worker answers ===');
     ok('opting out empties the panel', !/Playing now/.test(W2.document.querySelector('.rail').innerHTML));
     W2.eval('Counter.stop()');
 
+    // a Worker that answers but cannot reach its storage
+    const W3 = boot(() => Promise.resolve({ ok:true, json: async () => ({ online:0, deepest:{floor:0,name:''}, degraded:true }) }));
+    await W3.eval('Counter.ping()');
+    ok('degraded numbers are not shown as real', W3.eval('Counter.live') === false);
+    ok('a retry is scheduled after a failure', W3.eval('Counter.retryTimer !== null'));
+    ok('the panel stays empty while degraded', !/Playing now/.test(W3.document.querySelector('.rail').innerHTML));
+    W3.eval('Counter.stop()');
+
     console.log('\n'+(fail?fail+' FAILURES':'ALL PASSED'));
     process.exit(fail?1:0);
   })();

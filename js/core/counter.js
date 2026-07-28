@@ -18,11 +18,18 @@ const COUNTER_URL = "https://bloodfell-counter.bennipatry.workers.dev";
 
 const COUNTER_PING_MS = 5 * 60 * 1000;
 
+/* When a check-in fails — no network, the Worker down, or its daily allowance
+   spent — waiting a full five minutes to try again leaves the panel dead for
+   no reason. Back off gently instead, then settle into the normal cadence. */
+const COUNTER_RETRY_MS = [20 * 1000, 60 * 1000, 150 * 1000];
+
 const Counter = {
   online: 0,
   deepest: { floor: 0, name: "" },
   live: false,          // true once a request has actually succeeded
   timer: null,
+  retryTimer: null,
+  failures: 0,
 
   enabled() {
     return !!COUNTER_URL && S.settings.globalCounter !== false;
@@ -50,7 +57,17 @@ const Counter = {
 
   stop() {
     if (this.timer) clearInterval(this.timer);
+    if (this.retryTimer) clearTimeout(this.retryTimer);
     this.timer = null;
+    this.retryTimer = null;
+  },
+
+  /* Called whenever a check-in does not come back usable. */
+  failed() {
+    if (!this.enabled() || this.retryTimer) return;
+    const wait = COUNTER_RETRY_MS[Math.min(this.failures, COUNTER_RETRY_MS.length - 1)];
+    this.failures++;
+    this.retryTimer = setTimeout(() => { this.retryTimer = null; this.ping(); }, wait);
   },
 
   async ping() {
@@ -68,13 +85,19 @@ const Counter = {
           name: S.name && S.name !== "Nameless" ? S.name : "",
         }),
       });
-      if (!res.ok) return;
+      if (!res.ok) { this.failed(); return; }
       const data = await res.json();
+      // `degraded` means the Worker answered but could not reach its storage,
+      // so the numbers are meaningless. Showing a confident 0 is worse than
+      // showing nothing: treat it as a failure and come back shortly.
+      if (data.degraded) { this.failed(); return; }
       this.online = data.online || 0;
       if (data.deepest) this.deepest = data.deepest;
       this.live = true;
+      this.failures = 0;
       this.paint();
     } catch (e) {
+      this.failed();
       /* No network, blocked request, or the Worker's daily allowance is spent.
          Stay quiet and try again in five minutes. Someone playing on a plane
          must never see an error from this. */

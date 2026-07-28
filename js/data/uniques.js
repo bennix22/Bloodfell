@@ -204,8 +204,8 @@ const UNIQUES = [
     stats: { str: 179, sta: 133 },
     passive: {
       id: "pact_iron",
-      name: "Blood for Work",
-      text: "Spells are paid for in Health instead of mana, at half the cost. Your mana pool becomes irrelevant and your lifesteal becomes essential.",
+      name: "The Iron Tithe",
+      text: "Every swing takes 6% of your maximum Mana and strikes 35% harder for it. Run the pool dry and it is only iron until you recover. A Strength weapon that suddenly cares what your Mana and its regeneration are doing.",
     },
   },
   {

@@ -29,6 +29,10 @@ const SMOOTH_WINDOW = 1.0;      // seconds that Even Keel spreads a blow across
 // never immortal.
 const DROWNED_DR = 0.30;
 
+/* Pact Iron: the share of maximum Mana each swing takes, and what it pays back. */
+const PACT_IRON_TITHE = 0.06;
+const PACT_IRON_BONUS = 1.35;
+
 const PASSIVES = {
 
   /* ------------------------------------------------------------------------
@@ -167,18 +171,25 @@ const PASSIVES = {
     },
   },
 
-  /* Health as the casting resource. Cheaper, but it comes out of you. */
+  /* ------------------------------------------------------------------------
+     The Iron Tithe \u2014 the weapon takes mana and gives back force.
+     Every swing spends a slice of your maximum Mana and hits far harder for it.
+     Run dry and it is only iron until the pool comes back. This is deliberately
+     the opposite bargain to Blood Price: that one spends HEALTH to cast SPELLS,
+     this one spends MANA to SWING, which gives a Strength build a reason to care
+     about a pool it would otherwise ignore.
+
+     The mutation lives in damageDealt, which the engine calls once per landed
+     hit \u2014 a real event. It must never move into a hook the engine calls to
+     ASK what something would cost; that mistake is what made this item lethal.
+     ------------------------------------------------------------------------ */
   pact_iron: {
-    manaCost(C, cost) {
-      const hp = cost * 0.5 * (C.stats.maxHp / Math.max(1, C.stats.maxMana));
-      C.passiveState.pendingHealthCost = (C.passiveState.pendingHealthCost || 0) + hp;
-      return 0;
-    },
-    tick(C) {
-      const owed = C.passiveState.pendingHealthCost || 0;
-      if (owed <= 0) return;
-      C.passiveState.pendingHealthCost = 0;
-      C.applyRawDamage(owed);
+    damageDealt(C, dmg, ctx) {
+      if (!ctx || ctx.source !== "auto") return dmg;     // only weapon swings pay
+      const tithe = C.stats.maxMana * PACT_IRON_TITHE;
+      if (C.player.mana < tithe) return dmg;             // dry: no cost, no bonus
+      C.player.mana -= tithe;
+      return dmg * PACT_IRON_BONUS;
     },
   },
 
